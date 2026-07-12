@@ -1,9 +1,25 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import {
+  AreaChart, Area, BarChart, Bar, RadarChart, Radar, PolarGrid, PolarAngleAxis,
+  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, PolarRadiusAxis
+} from 'recharts';
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
-// Mock data removed in favor of direct API connection
+// ── Custom brutalist tooltip ──────────────────────────────────────────────────
+const BrutalTooltip = ({ active, payload, label }) => {
+  if (!active || !payload?.length) return null;
+  return (
+    <div className="bg-white border-2 border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] px-3 py-2 text-xs font-black uppercase">
+      {label && <p className="mb-1 text-on-surface-variant">{label}</p>}
+      {payload.map((p, i) => (
+        <p key={i} style={{ color: p.color }}>{p.name}: <span className="text-on-surface">{typeof p.value === 'number' ? p.value.toFixed(1) : p.value}</span></p>
+      ))}
+    </div>
+  );
+};
 
 export default function Dashboard({ subPage, onNavigate, showToast }) {
   const [data, setData] = useState({
@@ -19,9 +35,7 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
   });
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    fetchDashboard();
-  }, []);
+  useEffect(() => { fetchDashboard(); }, []);
 
   const fetchDashboard = async () => {
     setLoading(true);
@@ -37,72 +51,42 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
           total_score: parseFloat(result.overall_score?.total_score || result.overall?.total_score) || 0
         },
         rankings: result.rankings || result.dept_scores || [],
-        trend: result.trend ? result.trend.map(t => ({ month: t.month.split('-')[1] || t.month, emissions: t.emissions })) : (result.emissions_trend || []),
+        trend: result.trend
+          ? result.trend.map(t => ({ month: t.month.split('-')[1] || t.month, emissions: t.emissions }))
+          : (result.emissions_trend || []),
         notifications: result.notifications || []
       }));
-    } catch (e) {
+    } catch {
       if (showToast) showToast("Network error fetching dashboard data.", "error");
     }
     setLoading(false);
   };
 
-  const renderTrendSVG = () => {
-    const trend = data.trend || [];
-    const width = 600;
-    const height = 240;
-    const padding = 40;
+  // Derived chart data
+  const radarData = [
+    { axis: 'Environmental', score: data.overall.environmental_score },
+    { axis: 'Social', score: data.overall.social_score },
+    { axis: 'Governance', score: data.overall.governance_score },
+  ];
 
-    const maxVal = Math.max(...trend.map(t => t.emissions), 100);
-    const xStep = trend.length > 1 ? (width - padding * 2) / (trend.length - 1) : 0;
-    const yScale = (height - padding * 2) / maxVal;
+  const pieData = [
+    { name: 'Environmental', value: data.overall.environmental_score || 1 },
+    { name: 'Social', value: data.overall.social_score || 1 },
+    { name: 'Governance', value: data.overall.governance_score || 1 },
+  ];
+  const PIE_COLORS = ['#50604b', '#2563eb', '#ea580c'];
 
-    const points = trend.map((t, i) => {
-      const x = padding + i * xStep;
-      const y = height - padding - t.emissions * yScale;
-      return `${x},${y}`;
-    }).join(' ');
+  const deptBarData = data.rankings.map((d, i) => ({
+    name: (d.department?.name || d.department_name || `Dept${i}`).substring(0, 6),
+    score: parseFloat(d.total_score) || 0,
+    env: parseFloat(d.environmental_score) || 0,
+    soc: parseFloat(d.social_score) || 0,
+    gov: parseFloat(d.governance_score) || 0,
+  }));
 
-    return (
-      <svg className="w-full h-auto bg-surface-container-low border-2 border-on-surface p-2" viewBox={`0 0 ${width} ${height}`}>
-        <defs>
-          <pattern id="diagonal-stripes" x="0" y="0" width="10" height="10" patternUnits="userSpaceOnUse">
-            <line x1="0" y1="0" x2="0" y2="10" stroke="#eae7e7" strokeWidth="2" />
-          </pattern>
-        </defs>
-        
-        <rect x={padding} y={padding} width={width - padding * 2} height={height - padding * 2} fill="url(#diagonal-stripes)" />
-        <rect x={padding} y={padding} width={width - padding * 2} height={height - padding * 2} fill="none" stroke="#1c1b1b" strokeWidth="2" />
-
-        {[0, 0.25, 0.5, 0.75, 1].map((p, i) => {
-          const y = padding + p * (height - padding * 2);
-          const labelVal = Math.round(maxVal - p * maxVal);
-          return (
-            <g key={i}>
-              <line x1={padding} y1={y} x2={width - padding} y2={y} stroke="#1c1b1b" strokeWidth="1" strokeDasharray="3,3" />
-              <text x={padding - 10} y={y + 4} className="font-label-bold text-[10px] text-right" textAnchor="end">{labelVal}t</text>
-            </g>
-          );
-        })}
-
-        <polyline points={points} fill="none" stroke="#1c1b1b" strokeWidth="3" strokeLinecap="square" />
-        
-        {trend.map((t, i) => {
-          const x = padding + i * xStep;
-          const y = height - padding - t.emissions * yScale;
-          return (
-            <g key={i}>
-              <rect x={x - 4} y={y - 4} width="8" height="8" fill="#50604b" stroke="#1c1b1b" strokeWidth="2" />
-              <text x={x} y={height - 12} className="font-label-bold text-[10px]" textAnchor="middle">{t.month}</text>
-            </g>
-          );
-        })}
-      </svg>
-    );
-  };
-
-  const getDeptBarHeight = (score) => {
-    return `${Math.max(10, score)}%`;
-  };
+  const trendData = data.trend.length > 0
+    ? data.trend
+    : [{ month: 'Jan', emissions: 0 }];
 
   return (
     <div className="space-y-8">
@@ -124,89 +108,157 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
 
       {subPage === 'overview' && (
         <>
-          {/* Metric Cards Grid */}
-          <section className="grid grid-cols-1 md:grid-cols-4 gap-6" data-purpose="top-kpi-metrics">
-            <article className="brutalist-card p-6 border-t-[6px] border-t-secondary cursor-pointer" onClick={() => onNavigate('environmental')}>
-              <h3 className="text-[11px] uppercase text-on-surface font-black mb-4 tracking-wider">Environmental Score</h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-black text-on-surface">{data.overall.environmental_score.toFixed(0)}</span>
-                <span className="text-xl font-bold text-on-surface-variant opacity-40">/ 100</span>
-              </div>
-            </article>
-            
-            <article className="brutalist-card p-6 border-t-[6px] border-t-blue-600 cursor-pointer" onClick={() => onNavigate('social')}>
-              <h3 className="text-[11px] uppercase text-on-surface font-black mb-4 tracking-wider">Social Score</h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-black text-on-surface">{data.overall.social_score.toFixed(0)}</span>
-                <span className="text-xl font-bold text-on-surface-variant opacity-40">/ 100</span>
-              </div>
-            </article>
-            
-            <article className="brutalist-card p-6 border-t-[6px] border-t-orange-600">
-              <h3 className="text-[11px] uppercase text-on-surface font-black mb-4 tracking-wider">Governance Score</h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-black text-on-surface">{data.overall.governance_score.toFixed(0)}</span>
-                <span className="text-xl font-bold text-on-surface-variant opacity-40">/ 100</span>
-              </div>
-            </article>
-            
-            <article className="brutalist-card p-6 border-t-[6px] border-t-on-surface">
-              <h3 className="text-[11px] uppercase text-on-surface font-black mb-4 tracking-wider">Overall ESG Score</h3>
-              <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-black text-on-surface">{data.overall.total_score.toFixed(0)}</span>
-                <span className="text-xl font-bold text-on-surface-variant opacity-40">/ 100</span>
-              </div>
-            </article>
+          {/* KPI Score Cards */}
+          <section className="grid grid-cols-1 md:grid-cols-4 gap-6">
+            {[
+              { label: 'Environmental Score', value: data.overall.environmental_score, color: 'border-t-secondary', nav: 'environmental' },
+              { label: 'Social Score', value: data.overall.social_score, color: 'border-t-blue-600', nav: 'social' },
+              { label: 'Governance Score', value: data.overall.governance_score, color: 'border-t-orange-600', nav: 'governance' },
+              { label: 'Overall ESG Score', value: data.overall.total_score, color: 'border-t-on-surface', nav: null },
+            ].map(({ label, value, color, nav }) => (
+              <article
+                key={label}
+                className={`brutalist-card p-6 border-t-[6px] ${color} ${nav ? 'cursor-pointer' : ''}`}
+                onClick={() => nav && onNavigate(nav)}
+              >
+                <h3 className="text-[11px] uppercase text-on-surface font-black mb-3 tracking-wider">{label}</h3>
+                <div className="flex items-baseline gap-2 mb-3">
+                  <span className="text-5xl font-black text-on-surface">{value.toFixed(0)}</span>
+                  <span className="text-xl font-bold text-on-surface-variant opacity-40">/ 100</span>
+                </div>
+                {/* Mini progress bar */}
+                <div className="w-full h-2 bg-surface-variant border border-on-surface">
+                  <div
+                    className="h-full bg-on-surface transition-all duration-700"
+                    style={{ width: `${Math.min(value, 100)}%` }}
+                  />
+                </div>
+              </article>
+            ))}
           </section>
 
-          {/* Middle Charts Section */}
+          {/* Charts Row 1: Emissions Trend + Dept Bar Chart */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <section className="brutalist-card p-8" data-purpose="emissions-chart-container">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
-                  <span className="material-symbols-outlined">show_chart</span>
-                  Emissions Trend (12 mo)
-                </h3>
-              </div>
-              <div className="relative w-full">
-                {renderTrendSVG()}
-              </div>
+
+            {/* Emissions Area Chart */}
+            <section className="brutalist-card p-6">
+              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-6">
+                <span className="material-symbols-outlined">show_chart</span>
+                Emissions Trend (12 mo)
+              </h3>
+              <ResponsiveContainer width="100%" height={240}>
+                <AreaChart data={trendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <defs>
+                    <linearGradient id="emissionsGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#50604b" stopOpacity={0.35} />
+                      <stop offset="95%" stopColor="#50604b" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                  <XAxis dataKey="month" tick={{ fontSize: 10, fontWeight: 700 }} />
+                  <YAxis tick={{ fontSize: 10, fontWeight: 700 }} />
+                  <Tooltip content={<BrutalTooltip />} />
+                  <Area
+                    type="monotone"
+                    dataKey="emissions"
+                    name="Emissions (t)"
+                    stroke="#50604b"
+                    strokeWidth={3}
+                    fill="url(#emissionsGrad)"
+                    dot={{ r: 4, fill: '#50604b', stroke: '#1c1b1b', strokeWidth: 2 }}
+                    activeDot={{ r: 6, stroke: '#1c1b1b', strokeWidth: 2 }}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </section>
 
-            <section className="brutalist-card p-8" data-purpose="department-ranking-container">
-              <div className="flex justify-between items-center mb-8">
-                <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-3">
-                  <span className="material-symbols-outlined">bar_chart</span>
-                  Department ESG Ranking
-                </h3>
-              </div>
-              <div className="flex items-end justify-between h-64 px-4 pb-4 w-full border-b-2 border-on-surface">
-                {data.rankings.length > 0 ? data.rankings.map((dept, idx) => {
-                  const score = parseFloat(dept.total_score) || 0;
-                  const isLogistics = dept.department?.name?.toLowerCase().includes('logi') || (dept.department_name && dept.department_name.toLowerCase().includes('logi'));
-                  const displayName = (dept.department?.name || dept.department_name || `Dept${idx}`).substring(0, 4);
+            {/* Department Stacked Bar Chart */}
+            <section className="brutalist-card p-6">
+              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-6">
+                <span className="material-symbols-outlined">bar_chart</span>
+                Department ESG Ranking
+              </h3>
+              {deptBarData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={deptBarData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 9, fontWeight: 700 }} />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: 10, fontWeight: 700 }} />
+                    <Tooltip content={<BrutalTooltip />} />
+                    <Legend wrapperStyle={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }} />
+                    <Bar dataKey="env" name="Env" stackId="a" fill="#50604b" />
+                    <Bar dataKey="soc" name="Social" stackId="a" fill="#2563eb" />
+                    <Bar dataKey="gov" name="Gov" stackId="a" fill="#ea580c" radius={[2, 2, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-60 flex items-center justify-center text-sm font-bold uppercase text-on-surface-variant">
+                  No department data available.
+                </div>
+              )}
+            </section>
+          </div>
 
-                  return (
-                    <div key={idx} className="flex flex-col items-center gap-2 w-12 relative group h-full justify-end">
-                      {isLogistics && (
-                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-3 py-1 font-bold uppercase whitespace-nowrap z-10 border border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hidden group-hover:block">
-                          Generous Kingfisher
-                        </div>
-                      )}
-                      <div className="absolute -top-6 text-[10px] font-bold hidden group-hover:block">{score.toFixed(0)}</div>
-                      <div
-                        style={{ height: getDeptBarHeight(score) }}
-                        className={`w-full border-2 border-on-surface transition-all duration-300 ${
-                          idx % 2 === 0 ? 'bg-surface-variant' : 'bg-primary'
-                        }`}
-                      ></div>
-                      <span className="text-[9px] font-black uppercase text-on-surface mt-1">{displayName}</span>
-                    </div>
-                  );
-                }) : (
-                  <div className="w-full text-center text-sm font-bold uppercase text-on-surface-variant py-10">No department data available.</div>
-                )}
-              </div>
+          {/* Charts Row 2: Radar + Pie */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+            {/* ESG Radar Chart */}
+            <section className="brutalist-card p-6">
+              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-6">
+                <span className="material-symbols-outlined">radar</span>
+                ESG Pillar Radar
+              </h3>
+              <ResponsiveContainer width="100%" height={240}>
+                <RadarChart data={radarData} margin={{ top: 10, right: 30, left: 30, bottom: 10 }}>
+                  <PolarGrid stroke="#1c1b1b" strokeDasharray="3 3" />
+                  <PolarAngleAxis dataKey="axis" tick={{ fontSize: 11, fontWeight: 700 }} />
+                  <PolarRadiusAxis angle={90} domain={[0, 100]} tick={{ fontSize: 9 }} />
+                  <Radar
+                    name="Score"
+                    dataKey="score"
+                    stroke="#50604b"
+                    strokeWidth={2}
+                    fill="#50604b"
+                    fillOpacity={0.3}
+                    dot={{ r: 4, fill: '#50604b', stroke: '#1c1b1b', strokeWidth: 2 }}
+                  />
+                  <Tooltip content={<BrutalTooltip />} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </section>
+
+            {/* ESG Pillar Pie Chart */}
+            <section className="brutalist-card p-6">
+              <h3 className="text-sm font-black uppercase tracking-widest flex items-center gap-2 mb-6">
+                <span className="material-symbols-outlined">donut_large</span>
+                ESG Score Distribution
+              </h3>
+              <ResponsiveContainer width="100%" height={240}>
+                <PieChart>
+                  <Pie
+                    data={pieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={55}
+                    outerRadius={90}
+                    paddingAngle={3}
+                    dataKey="value"
+                    stroke="#1c1b1b"
+                    strokeWidth={2}
+                  >
+                    {pieData.map((_, i) => (
+                      <Cell key={i} fill={PIE_COLORS[i]} />
+                    ))}
+                  </Pie>
+                  <Tooltip content={<BrutalTooltip />} />
+                  <Legend
+                    wrapperStyle={{ fontSize: 10, fontWeight: 700, textTransform: 'uppercase' }}
+                    formatter={(value, entry) => (
+                      <span style={{ color: entry.color }}>{value}: {entry.payload.value.toFixed(0)}</span>
+                    )}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
             </section>
           </div>
 
@@ -268,34 +320,65 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
       )}
 
       {subPage === 'metrics' && (
-        <div className="border-2 border-on-background bg-white brutalist-shadow">
-          <div className="bg-primary-container text-on-primary-container p-6 border-b-2 border-on-background flex justify-between items-center">
-            <h3 className="text-headline-md font-headline-md uppercase">QUARTERLY ESG BENCHMARKS</h3>
-            <span className="font-label-bold text-label-bold uppercase">Sector: Heavy Industry</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left font-body-md border-collapse">
-              <thead>
-                <tr className="bg-surface-container-high border-b-2 border-on-background">
-                  <th className="p-4 font-label-bold uppercase border-r-2 border-on-background">Indicator</th>
-                  <th className="p-4 font-label-bold uppercase border-r-2 border-on-background text-center">Baseline</th>
-                  <th className="p-4 font-label-bold uppercase border-r-2 border-on-background text-center">Target</th>
-                  <th className="p-4 font-label-bold uppercase text-center">Status</th>
-                </tr>
-              </thead>
-              <tbody className="font-label-bold">
-                {data.benchmarks.map((bm, index) => (
-                  <tr key={index} className="border-b-2 border-on-background hover:bg-surface-container-low transition-colors">
-                    <td className="p-4 border-r-2 border-on-background">{bm.indicator}</td>
-                    <td className="p-4 border-r-2 border-on-background text-center font-mono">{bm.baseline}</td>
-                    <td className="p-4 border-r-2 border-on-background text-center font-mono">{bm.target}</td>
-                    <td className="p-4 text-center">
-                      <span className={`${bm.class} px-2 py-1 border border-on-background text-[10px]`}>{bm.status}</span>
-                    </td>
+        <div className="space-y-8">
+          {/* Benchmark progress bars */}
+          <section className="brutalist-card p-8">
+            <h3 className="text-sm font-black uppercase tracking-widest mb-6">Benchmark Progress</h3>
+            <div className="space-y-6">
+              {data.benchmarks.map((bm, i) => {
+                const pct = Math.min(100, (bm.baseline / bm.target) * 100);
+                const colors = ['#ef4444', '#50604b', '#2563eb'];
+                return (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-1">
+                      <span className="text-xs font-black uppercase">{bm.indicator}</span>
+                      <span className={`${bm.class} px-2 py-0.5 border border-on-surface text-[10px] font-black`}>{bm.status}</span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 h-4 bg-surface-variant border-2 border-on-surface">
+                        <div
+                          className="h-full transition-all duration-700"
+                          style={{ width: `${pct}%`, backgroundColor: colors[i] }}
+                        />
+                      </div>
+                      <span className="text-xs font-black w-24 text-right">{bm.baseline} / {bm.target}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+
+          {/* Benchmark table */}
+          <div className="border-2 border-on-background bg-white brutalist-shadow">
+            <div className="bg-primary-container text-on-primary-container p-6 border-b-2 border-on-background flex justify-between items-center">
+              <h3 className="text-headline-md font-headline-md uppercase">QUARTERLY ESG BENCHMARKS</h3>
+              <span className="font-label-bold text-label-bold uppercase">Sector: Heavy Industry</span>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left font-body-md border-collapse">
+                <thead>
+                  <tr className="bg-surface-container-high border-b-2 border-on-background">
+                    <th className="p-4 font-label-bold uppercase border-r-2 border-on-background">Indicator</th>
+                    <th className="p-4 font-label-bold uppercase border-r-2 border-on-background text-center">Baseline</th>
+                    <th className="p-4 font-label-bold uppercase border-r-2 border-on-background text-center">Target</th>
+                    <th className="p-4 font-label-bold uppercase text-center">Status</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="font-label-bold">
+                  {data.benchmarks.map((bm, index) => (
+                    <tr key={index} className="border-b-2 border-on-background hover:bg-surface-container-low transition-colors">
+                      <td className="p-4 border-r-2 border-on-background">{bm.indicator}</td>
+                      <td className="p-4 border-r-2 border-on-background text-center font-mono">{bm.baseline}</td>
+                      <td className="p-4 border-r-2 border-on-background text-center font-mono">{bm.target}</td>
+                      <td className="p-4 text-center">
+                        <span className={`${bm.class} px-2 py-1 border border-on-background text-[10px]`}>{bm.status}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
       )}
@@ -304,13 +387,11 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
         <div className="bg-white border-2 border-on-surface p-6 brutalist-shadow">
           <h3 className="font-headline-md text-headline-md uppercase mb-4">CSR ACTIVITIES OVERVIEW</h3>
           <p className="text-sm text-on-surface-variant mb-6">
-            Review active employee CSR (Corporate Social Responsibility) targets and voluntary challenges. Go to the Social module tab to log direct employee contributions.
+            Review active employee CSR targets and voluntary challenges. Go to the Social module tab to log direct employee contributions.
           </p>
-          <div className="flex gap-4">
-            <button onClick={() => onNavigate('social')} className="bg-secondary-fixed text-on-secondary-fixed px-6 py-3 border-2 border-on-background brutalist-button font-headline-md uppercase text-xs">
-              Go to Employee Social Module
-            </button>
-          </div>
+          <button onClick={() => onNavigate('social')} className="bg-secondary-fixed text-on-secondary-fixed px-6 py-3 border-2 border-on-background brutalist-button font-headline-md uppercase text-xs">
+            Go to Employee Social Module
+          </button>
         </div>
       )}
 
@@ -318,13 +399,11 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
         <div className="bg-white border-2 border-on-surface p-6 brutalist-shadow">
           <h3 className="font-headline-md text-headline-md uppercase mb-4">ENVIRONMENTAL GOALS INDEX</h3>
           <p className="text-sm text-on-surface-variant mb-6">
-            Review active environmental goals and carbon emission threshold guidelines. Go to the Environmental module tab to configure factors or track outputs.
+            Review active environmental goals and carbon emission threshold guidelines.
           </p>
-          <div className="flex gap-4">
-            <button onClick={() => onNavigate('environmental')} className="bg-secondary-fixed text-on-secondary-fixed px-6 py-3 border-2 border-on-background brutalist-button font-headline-md uppercase text-xs">
-              Go to Environmental Module
-            </button>
-          </div>
+          <button onClick={() => onNavigate('environmental')} className="bg-secondary-fixed text-on-secondary-fixed px-6 py-3 border-2 border-on-background brutalist-button font-headline-md uppercase text-xs">
+            Go to Environmental Module
+          </button>
         </div>
       )}
 
