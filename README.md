@@ -70,6 +70,15 @@ A full-stack **Environmental, Social, and Governance (ESG)** management platform
 * Export to **PDF**, **Excel**, and **CSV**
 
 ---
+## 🌟 Bonus Features
+
+* Department ESG rankings
+* Interactive dashboards
+* Mobile-responsive interface
+* Custom report builder
+* PDF, Excel, and CSV exports
+
+---
 
 ## ⚙️ Core Business Workflow
 
@@ -162,24 +171,9 @@ odoo_final/
 * Demo data seeding
 * Responsive user interface
 
----
-
-## 🌟 Bonus Features
-
-* Department ESG rankings
-* Interactive dashboards
-* Mobile-responsive interface
-* Custom report builder
-* PDF, Excel, and CSV exports
 
 ---
 
-## 🌱 Demo Data
-
-Populate the application with sample departments, employees, ESG policies, challenges, badges, rewards, audits, compliance issues, and other demo data using:
-
-```bash
-python manage.py seed_esg
 ```
 
 > **Note:** Running the seeder resets the existing demo data.
