@@ -16,7 +16,7 @@ export default function LoginPage({ onNavigate }) {
     }
     // Simulate authentication
     console.log("Authenticated terminal:", { email, rememberTerminal });
-    onNavigate('landing');
+    onNavigate('dashboard');
   };
 
   return (
