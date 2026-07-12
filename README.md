@@ -136,50 +136,6 @@ odoo_final/
 
 ---
 
-## 🛠 Getting Started
-
-### Clone the repository
-
-```bash
-git clone <repository-url>
-cd odoo_final
-```
-
-### Backend
-
-```bash
-cd backend
-
-pip install -r requirements.txt
-
-python manage.py migrate
-python manage.py seed_esg
-python manage.py runserver
-```
-
-Backend runs at:
-
-```text
-http://localhost:8000/api/
-```
-
-### Frontend
-
-```bash
-cd frontend
-
-npm install
-npm run dev
-```
-
-Frontend runs at:
-
-```text
-http://localhost:5173
-```
-
----
-
 ## 🔗 API Modules
 
 | Module        | Description                                                  |
