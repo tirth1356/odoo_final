@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import Dashboard from './Dashboard';
 import Environmental from './Environmental';
 import Social from './Social';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
 
 const API_BASE = 'http://localhost:8000/api';
 
@@ -40,8 +43,8 @@ const SUB_MODULES = {
   }
 };
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('landing'); // landing, login, dashboard, environmental, social, gaming, reports
+function MainApp() {
+  const [currentPage, setCurrentPage] = useState('dashboard'); // dashboard, environmental, social, gaming, reports
   const [currentSubPage, setCurrentSubPage] = useState('overview');
   const [bellOpen, setBellOpen] = useState(false);
   const [notifications, setNotifications] = useState([
@@ -129,13 +132,6 @@ export default function App() {
     const query = new URLSearchParams(reportFilters).toString();
     window.open(`${API_BASE}/system/export-report/?${query}`, '_blank');
   };
-
-  if (currentPage === 'landing') {
-    return <LandingPage onNavigate={setCurrentPage} />;
-  }
-  if (currentPage === 'login') {
-    return <LoginPage onNavigate={setCurrentPage} />;
-  }
 
   const activeModule = SUB_MODULES[currentPage] || SUB_MODULES['dashboard'];
 
@@ -316,7 +312,11 @@ export default function App() {
             </button>
             <button 
               className="flex items-center space-x-3 p-2 font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-error w-full text-left" 
-              onClick={() => setCurrentPage('landing')}
+              onClick={() => {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.href = '/';
+              }}
             >
               <span className="material-symbols-outlined">logout</span>
               <span>Log Out</span>
@@ -336,7 +336,7 @@ export default function App() {
         </aside>
 
         {/* Dynamic View Canvas */}
-        <main className="lg:ml-64 flex-grow p-6 md:p-10 max-w-6xl mx-auto w-full pb-24">
+        <main className="lg:ml-64 flex-grow p-6 md:p-10 w-full pb-24">
           {currentPage === 'dashboard' && <Dashboard subPage={currentSubPage} onNavigate={setCurrentPage} />}
           {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
           {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
@@ -462,5 +462,38 @@ export default function App() {
         </div>
       </nav>
     </div>
+  );
+}
+
+export default function App() {
+  // Set up axios interceptor to attach JWT token
+  useEffect(() => {
+    const interceptor = axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    }, (error) => {
+      return Promise.reject(error);
+    });
+
+    return () => {
+      axios.interceptors.request.eject(interceptor);
+    };
+  }, []);
+
+  return (
+    <Router>
+      <Routes>
+        {/* We can make a separate Dashboard page later, for now landing page is the "home" */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/app/*" element={<MainApp />} />
+        {/* Redirect unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }
