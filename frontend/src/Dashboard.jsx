@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
 // Mock data removed in favor of direct API connection
 
@@ -25,24 +26,20 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
   const fetchDashboard = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/system/dashboard/`);
-      if (res.ok) {
-        const result = await res.json();
-        setData(prev => ({
-          ...prev,
-          overall: {
-            environmental_score: parseFloat(result.overall.environmental_score) || 0,
-            social_score: parseFloat(result.overall.social_score) || 0,
-            governance_score: parseFloat(result.overall.governance_score) || 0,
-            total_score: parseFloat(result.overall.total_score) || 0
-          },
-          rankings: result.rankings || [],
-          trend: result.trend ? result.trend.map(t => ({ month: t.month.split('-')[1] || t.month, emissions: t.emissions })) : [],
-          notifications: result.notifications || []
-        }));
-      } else {
-        if (showToast) showToast("Failed to fetch dashboard data.", "error");
-      }
+      const res = await axios.get(`${API_BASE}/system/dashboard/`);
+      const result = res.data;
+      setData(prev => ({
+        ...prev,
+        overall: {
+          environmental_score: parseFloat(result.overall_score?.environmental_score || result.overall?.environmental_score) || 0,
+          social_score: parseFloat(result.overall_score?.social_score || result.overall?.social_score) || 0,
+          governance_score: parseFloat(result.overall_score?.governance_score || result.overall?.governance_score) || 0,
+          total_score: parseFloat(result.overall_score?.total_score || result.overall?.total_score) || 0
+        },
+        rankings: result.rankings || result.dept_scores || [],
+        trend: result.trend ? result.trend.map(t => ({ month: t.month.split('-')[1] || t.month, emissions: t.emissions })) : (result.emissions_trend || []),
+        notifications: result.notifications || []
+      }));
     } catch (e) {
       if (showToast) showToast("Network error fetching dashboard data.", "error");
     }
@@ -56,7 +53,7 @@ export default function Dashboard({ subPage, onNavigate, showToast }) {
     const padding = 40;
 
     const maxVal = Math.max(...trend.map(t => t.emissions), 100);
-    const xStep = (width - padding * 2) / (trend.length - 1);
+    const xStep = trend.length > 1 ? (width - padding * 2) / (trend.length - 1) : 0;
     const yScale = (height - padding * 2) / maxVal;
 
     const points = trend.map((t, i) => {

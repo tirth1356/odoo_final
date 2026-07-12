@@ -11,7 +11,7 @@ import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
 import Settings from './Settings';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
 const SUB_MODULES = {
   dashboard: {
@@ -122,37 +122,34 @@ function MainApp() {
 
   const fetchGlobalData = async () => {
     try {
-      const [resDepts, resRewards, resCh, resDash] = await Promise.all([
-        fetch(`${API_BASE}/departments/`),
-        fetch(`${API_BASE}/rewards/`),
-        fetch(`${API_BASE}/challenges/`),
-        fetch(`${API_BASE}/system/dashboard/`)
+      const [resDepts, resRewards, resCh, resDash, resProfile] = await Promise.all([
+        axios.get(`${API_BASE}/departments/`),
+        axios.get(`${API_BASE}/rewards/`),
+        axios.get(`${API_BASE}/challenges/`),
+        axios.get(`${API_BASE}/system/dashboard/`),
+        axios.get(`${API_BASE}/employee-profiles/current/`)
       ]);
-      if (resDepts.ok) setDepartments(await resDepts.json());
-      if (resRewards.ok) setRewards(await resRewards.json());
-      if (resCh.ok) setChallenges(await resCh.json());
-      if (resDash.ok) {
-        const dash = await resDash.json();
-        setNotifications(dash.notifications);
-        if (dash.leaderboard.length) {
-          const mainUser = dash.leaderboard.find(l => l.user.username === 'johngreen') || dash.leaderboard[0];
-          if (mainUser) {
-            setUserProfile({
-              username: mainUser.user?.username || mainUser.username || "user",
-              points: mainUser.points,
-              xp: mainUser.xp
-            });
-          }
-        }
-      }
+      setDepartments(resDepts.data);
+      setRewards(resRewards.data);
+      setChallenges(resCh.data);
+      
+      const dash = resDash.data;
+      setNotifications(dash.notifications);
+      
+      const p = resProfile.data;
+      setUserProfile({
+        username: p.user?.username || "user",
+        points: p.points,
+        xp: p.xp
+      });
     } catch (e) {
-      console.warn("Using mock state for sub-modules.");
+      console.warn("Failed to fetch global data:", e);
     }
   };
 
   const handleRecalculate = async () => {
     try {
-      await fetch(`${API_BASE}/system/calculate-scores/`, { method: 'POST' });
+      await axios.post(`${API_BASE}/system/calculate-scores/`);
       showToast("ESG scores recalculated successfully!", 'success');
       fetchGlobalData();
     } catch (e) {
@@ -176,7 +173,12 @@ function MainApp() {
   };
 
   const triggerExport = () => {
-    const query = new URLSearchParams(reportFilters).toString();
+    const params = {
+      department: reportFilters.department,
+      module: reportFilters.module,
+      export_format: reportFilters.format
+    };
+    const query = new URLSearchParams(params).toString();
     showToast(`Generating ${reportFilters.format.toUpperCase()} report for ${reportFilters.module}...`, 'info');
     window.open(`${API_BASE}/system/export-report/?${query}`, '_blank');
   };
@@ -546,9 +548,9 @@ function MainApp() {
 }
 
 export default function App() {
-  // Set up axios interceptor to attach JWT token
+  // Set up axios interceptors to attach JWT token and handle 401 Unauthorized redirect
   useEffect(() => {
-    const interceptor = axios.interceptors.request.use((config) => {
+    const reqInterceptor = axios.interceptors.request.use((config) => {
       const token = localStorage.getItem('access_token');
       if (token) {
         config.headers.Authorization = `Bearer ${token}`;
@@ -558,8 +560,25 @@ export default function App() {
       return Promise.reject(error);
     });
 
+    const resInterceptor = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response && error.response.status === 401) {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          // Avoid redirect loop if already on login/signup/landing
+          const path = window.location.pathname;
+          if (path !== '/login' && path !== '/signup' && path !== '/') {
+            window.location.href = '/login';
+          }
+        }
+        return Promise.reject(error);
+      }
+    );
+
     return () => {
-      axios.interceptors.request.eject(interceptor);
+      axios.interceptors.request.eject(reqInterceptor);
+      axios.interceptors.response.eject(resInterceptor);
     };
   }, []);
 

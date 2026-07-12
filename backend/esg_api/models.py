@@ -190,6 +190,9 @@ class EnvironmentalScore(models.Model):
     def __str__(self):
         return f"{self.department.name} Env Score: {self.score}"
 
+    class Meta:
+        unique_together = ('department', 'date')
+
 # ==========================================
 # 4. Social Module
 # ==========================================
@@ -379,6 +382,9 @@ class DepartmentScore(models.Model):
     total_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     date = models.DateField() # Tracked monthly (e.g. YYYY-MM-01)
 
+    class Meta:
+        unique_together = ('department', 'date')
+
     def __str__(self):
         return f"{self.department.name} - ESG: {self.total_score} ({self.date})"
 
@@ -396,6 +402,9 @@ class OverallESGScore(models.Model):
     governance_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     total_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     date = models.DateField() # Monthly
+
+    class Meta:
+        unique_together = ('date',)
 
     def __str__(self):
         return f"Overall ESG Score: {self.total_score} ({self.date})"

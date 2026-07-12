@@ -274,8 +274,8 @@ class EmployeeProfileViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['get'])
     def current(self, request):
-        # Return first user profile or user from request (fallback to admin/first user for test)
-        user = request.user if request.user.is_authenticated else User.objects.first()
+        # Always return the main company-wide seeded profile so all users see the same data
+        user = User.objects.filter(username='employee0').first() or User.objects.filter(is_superuser=False).first() or User.objects.first()
         if not user:
             return Response({"error": "No user available"}, status=status.HTTP_404_NOT_FOUND)
         profile, _ = EmployeeProfile.objects.get_or_create(user=user)
@@ -555,8 +555,8 @@ class ESGSystemViewSet(viewsets.ViewSet):
         profiles = EmployeeProfile.objects.order_by('-xp')[:5]
         leaderboard = EmployeeProfileSerializer(profiles, many=True).data
         
-        # Compliance notification flags
-        user = request.user if request.user.is_authenticated else User.objects.first()
+        # Compliance notification flags for the common company user
+        user = User.objects.filter(username='employee0').first() or User.objects.filter(is_superuser=False).first() or User.objects.first()
         notifications = []
         if user:
             notifications = NotificationSerializer(
@@ -579,7 +579,7 @@ class ESGSystemViewSet(viewsets.ViewSet):
         start_date = request.query_params.get('start_date')
         end_date = request.query_params.get('end_date')
         module = request.query_params.get('module') # environmental, social, governance
-        export_format = request.query_params.get('format', 'csv') # csv, excel, pdf
+        export_format = request.query_params.get('export_format', 'csv') # csv, excel, pdf
         
         filters = Q()
         if dept_id:

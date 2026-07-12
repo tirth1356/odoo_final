@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_BASE = 'http://localhost:8000/api';
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
 // Mock data removed in favor of direct API connections
 
@@ -10,12 +10,7 @@ export default function Environmental({ subPage, setSubPage, onNavigate, showToa
   const [transactions, setTransactions] = useState([]);
   const [goals, setGoals] = useState([]);
   // Define fallback UI products if backend doesn't support products yet
-  const [products] = useState([
-    { id: 1, name: "Quantum X-1 Laptop", code: "ESG-9920-X", score: "A", scoreClass: "bg-secondary text-white", icon: "laptop_mac" },
-    { id: 2, name: "Omni Audio Base", code: "ESG-5580-O", score: "D", scoreClass: "bg-error text-white", icon: "speaker" },
-    { id: 3, name: "Nexus Router Pro", code: "ESG-4105-N", score: "C", scoreClass: "bg-tertiary-fixed text-on-tertiary-fixed-variant", icon: "router" },
-    { id: 4, name: "E-Slate Core 10", code: "ESG-1122-T", score: "B+", scoreClass: "bg-secondary-fixed text-on-secondary-fixed", icon: "tablet_android" }
-  ]);
+  const [products, setProducts] = useState([]);
 
   // Form States
   const [logType, setLogType] = useState('purchase');
@@ -29,12 +24,14 @@ export default function Environmental({ subPage, setSubPage, onNavigate, showToa
 
   const fetchMetadata = async () => {
     try {
-      const [resDepts, resEF] = await Promise.all([
+      const [resDepts, resEF, resProducts] = await Promise.all([
         fetch(`${API_BASE}/departments/`),
-        fetch(`${API_BASE}/emission-factors/`)
+        fetch(`${API_BASE}/emission-factors/`),
+        fetch(`${API_BASE}/product-esg/`)
       ]);
       if (resDepts.ok) setDepartments(await resDepts.json());
       if (resEF.ok) setFactors(await resEF.json());
+      if (resProducts.ok) setProducts(await resProducts.json());
     } catch (e) {
       if (showToast) showToast("Failed to fetch environmental metadata.", 'error');
     }
@@ -160,21 +157,33 @@ export default function Environmental({ subPage, setSubPage, onNavigate, showToa
               <h3 className="font-headline-md uppercase tracking-tight">Product ESG Profiles</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-              {products.map((prod, idx) => (
-                <div key={idx} className="brutalist-card p-6 flex flex-col items-center text-center gap-4 hover:bg-secondary-fixed/5 transition-colors">
-                  <div className="w-20 h-20 border-2 border-on-background flex items-center justify-center bg-surface-container-low shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-                    <span className="material-symbols-outlined text-4xl">{prod.icon}</span>
+              {products.length > 0 ? products.map((prod, idx) => {
+                // Determine color based on score (0-100)
+                let scoreClass = "bg-secondary text-white";
+                let letterGrade = "A";
+                const score = parseFloat(prod.esg_score);
+                if (score < 50) { scoreClass = "bg-error text-white"; letterGrade = "D"; }
+                else if (score < 70) { scoreClass = "bg-tertiary-fixed text-on-tertiary-fixed-variant"; letterGrade = "C"; }
+                else if (score < 85) { scoreClass = "bg-secondary-fixed text-on-secondary-fixed"; letterGrade = "B"; }
+
+                return (
+                  <div key={idx} className="brutalist-card p-6 flex flex-col items-center text-center gap-4 hover:bg-secondary-fixed/5 transition-colors">
+                    <div className="w-20 h-20 border-2 border-on-background flex items-center justify-center bg-surface-container-low shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                      <span className="material-symbols-outlined text-4xl">inventory_2</span>
+                    </div>
+                    <div>
+                      <h5 className="font-headline-md text-base uppercase">{prod.name}</h5>
+                      <p className="text-[10px] font-label-bold opacity-60">{prod.product_code}</p>
+                    </div>
+                    <div className={`w-14 h-14 rounded-full border-2 border-on-background ${scoreClass} flex items-center justify-center font-bold text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
+                      {letterGrade}
+                    </div>
+                    <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">ESG: {score.toFixed(1)}</span>
                   </div>
-                  <div>
-                    <h5 className="font-headline-md text-base uppercase">{prod.name}</h5>
-                    <p className="text-[10px] font-label-bold opacity-60">{prod.code}</p>
-                  </div>
-                  <div className={`w-14 h-14 rounded-full border-2 border-on-background ${prod.scoreClass} flex items-center justify-center font-bold text-xl shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]`}>
-                    {prod.score}
-                  </div>
-                  <span className="text-[9px] font-bold uppercase tracking-widest opacity-70">ESG SCORE</span>
-                </div>
-              ))}
+                );
+              }) : (
+                <div className="col-span-1 sm:col-span-2 lg:col-span-4 text-center text-sm font-bold uppercase text-on-surface-variant py-10">No product ESG profiles available.</div>
+              )}
             </div>
           </section>
         </>
