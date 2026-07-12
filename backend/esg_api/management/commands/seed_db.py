@@ -18,6 +18,21 @@ class Command(BaseCommand):
         self.stdout.write("Starting comprehensive database seeding...")
         today = date.today()
 
+        self.stdout.write("Clearing old demo data...")
+        EnvironmentalGoal.objects.all().delete()
+        ProductESGProfile.objects.all().delete()
+        ESGPolicy.objects.all().delete()
+        DepartmentScore.objects.all().delete()
+        OverallESGScore.objects.all().delete()
+        PurchaseRecord.objects.all().delete()
+        FleetRecord.objects.all().delete()
+        ManufacturingRecord.objects.all().delete()
+        ExpenseRecord.objects.all().delete()
+        CarbonTransaction.objects.all().delete()
+        EmployeeParticipation.objects.all().delete()
+        DiversityMetrics.objects.all().delete()
+        TrainingCompletion.objects.all().delete()
+
         # 0. Base Categories
         cat_csr, _ = Category.objects.get_or_create(name="Community Service", type="CSR Activity")
         cat_exp, _ = Category.objects.get_or_create(name="General Expenses", type="CSR Activity") # Reused for expenses
@@ -64,13 +79,12 @@ class Command(BaseCommand):
         for p in policies:
             ESGPolicy.objects.get_or_create(title=p["title"], defaults={"description": p["desc"], "effective_date": today.replace(year=today.year-1)})
 
-        # 4. Products & Environmental Goals
         prod, _ = ProductESGProfile.objects.get_or_create(name="EcoServer", product_code="ECO-01", defaults={"carbon_footprint": 150.0, "esg_score": 88.5})
         EnvironmentalGoal.objects.get_or_create(name="Reduce Logistics Emissions by 10%", target_value=5000, deadline=today.replace(year=today.year+1))
 
-        # 5. Historical Transactions: 50+ Carbon Transactions over last 12 months
-        self.stdout.write("Generating 60+ historical carbon transactions...")
-        for i in range(65):
+
+        self.stdout.write("Generating historical carbon transactions (reduced for speed)...")
+        for i in range(15):
             random_date = today - timedelta(days=random.randint(1, 360))
             dept = random.choice(departments)
             record_type = random.choice(['purchase', 'fleet', 'manufacturing', 'expense'])
@@ -161,5 +175,5 @@ class Command(BaseCommand):
             }
         )
 
-        self.stdout.write(self.style.SUCCESS("Database comprehensively seeded with 50+ transactions, audits, and rich dashboards!"))
+        self.stdout.write(self.style.SUCCESS("Database seeded with lighter demo data successfully!"))
 

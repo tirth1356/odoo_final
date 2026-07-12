@@ -2,42 +2,20 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = 'http://localhost:8000/api';
 
-const MOCK_DEPARTMENTS = [
-  { id: 1, name: "Logistics", target: "1,500 t", carbon: "1,245.00", status: "ACTIVE" },
-  { id: 2, name: "Manufacturing", target: "5,000 t", carbon: "4,892.50", status: "ON TRACK" },
-  { id: 3, name: "Corporate HQ", target: "1,000 t", carbon: "842.15", status: "ACTIVE" },
-  { id: 4, name: "Data Center", target: "2,500 t", carbon: "2,105.80", status: "ON TRACK" }
-];
+// Mock data removed in favor of direct API connections
 
-const MOCK_FACTORS = [
-  { name: "CO2 Grid Electricity", carbon_value: "0.478", unit: "kgCO2e/kWh" },
-  { name: "Natural Gas", carbon_value: "2.021", unit: "kgCO2e/m3" },
-  { name: "Diesel Fuel", carbon_value: "2.684", unit: "kgCO2e/liter" },
-  { name: "Recycled Paper", carbon_value: "0.582", unit: "kgCO2e/kg" }
-];
-
-const MOCK_GOALS = [
-  { id: 1, name: "Net Zero Ops", target_value: "300.0", current_value: "204.0", percentage: 68, badge: "Q3 TARGET", urgencyClass: "bg-secondary text-white" },
-  { id: 2, name: "Water Reuse", target_value: "50.0", current_value: "12.0", percentage: 24, badge: "URGENT", urgencyClass: "bg-tertiary text-white" },
-  { id: 3, name: "Renewable Mix", target_value: "4.5", current_value: "4.14", percentage: 92, badge: "ANNUAL", urgencyClass: "bg-primary text-white" }
-];
-
-const MOCK_PRODUCTS = [
-  { id: 1, name: "Quantum X-1 Laptop", code: "ESG-9920-X", score: "A", scoreClass: "bg-secondary text-white", icon: "laptop_mac" },
-  { id: 2, name: "Omni Audio Base", code: "ESG-5580-O", score: "D", scoreClass: "bg-error text-white", icon: "speaker" },
-  { id: 3, name: "Nexus Router Pro", code: "ESG-4105-N", score: "C", scoreClass: "bg-tertiary-fixed text-on-tertiary-fixed-variant", icon: "router" },
-  { id: 4, name: "E-Slate Core 10", code: "ESG-1122-T", score: "B+", scoreClass: "bg-secondary-fixed text-on-secondary-fixed", icon: "tablet_android" }
-];
-
-export default function Environmental({ subPage, setSubPage, onNavigate }) {
+export default function Environmental({ subPage, setSubPage, onNavigate, showToast }) {
   const [departments, setDepartments] = useState([]);
   const [factors, setFactors] = useState([]);
-  const [transactions, setTransactions] = useState([
-    { id: 1, date: "2026-07-12", department_name: "Logistics", record_type: "Fleet", item_details: "LOG-001 (Truck) - 1500 km", calculated_emission: "4020.00" },
-    { id: 2, date: "2026-07-10", department_name: "Operations", record_type: "Purchase", item_details: "Office Recycled Paper Cartons", calculated_emission: "16.50" },
-    { id: 3, date: "2026-07-08", department_name: "R&D", record_type: "Expense", item_details: "Lab Electricity - 1750 kWh", calculated_emission: "1443.75" }
-  ]);
+  const [transactions, setTransactions] = useState([]);
   const [goals, setGoals] = useState([]);
+  // Define fallback UI products if backend doesn't support products yet
+  const [products] = useState([
+    { id: 1, name: "Quantum X-1 Laptop", code: "ESG-9920-X", score: "A", scoreClass: "bg-secondary text-white", icon: "laptop_mac" },
+    { id: 2, name: "Omni Audio Base", code: "ESG-5580-O", score: "D", scoreClass: "bg-error text-white", icon: "speaker" },
+    { id: 3, name: "Nexus Router Pro", code: "ESG-4105-N", score: "C", scoreClass: "bg-tertiary-fixed text-on-tertiary-fixed-variant", icon: "router" },
+    { id: 4, name: "E-Slate Core 10", code: "ESG-1122-T", score: "B+", scoreClass: "bg-secondary-fixed text-on-secondary-fixed", icon: "tablet_android" }
+  ]);
 
   // Form States
   const [logType, setLogType] = useState('purchase');
@@ -58,7 +36,7 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
       if (resDepts.ok) setDepartments(await resDepts.json());
       if (resEF.ok) setFactors(await resEF.json());
     } catch (e) {
-      console.warn("Using mock metadata.");
+      if (showToast) showToast("Failed to fetch environmental metadata.", 'error');
     }
   };
 
@@ -82,10 +60,11 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
       }
       if (resGoals.ok) {
         const goalList = await resGoals.json();
+        // Fallback or use backend data if exists
         if (goalList.length) setGoals(goalList);
       }
     } catch (e) {
-      console.warn("Using mock transactional values.");
+      if (showToast) showToast("Failed to fetch transactions and goals.", 'error');
     }
   };
 
@@ -100,43 +79,24 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
         body: JSON.stringify(body)
       });
       if (res.ok) {
-        alert("Operation logged and carbon calculated!");
+        if (showToast) showToast("Operation logged and carbon calculated!", 'success');
         fetchTransactionsAndGoals();
         setPurchaseForm({ department: '', item_name: '', amount: '', emission_factor: '', quantity: '', date: '' });
         setFleetForm({ department: '', vehicle_id: '', distance_traveled: '', fuel_type: '', emission_factor: '', date: '' });
+      } else {
+        if (showToast) showToast("Error logging operation", 'error');
       }
     } catch (err) {
-      // simulate post local
-      const resolvedFactors = factors.length ? factors : MOCK_FACTORS.map((f, i) => ({ id: i + 1, name: f.name, carbon_value: f.carbon_value }));
-      const mockEF = resolvedFactors.find(f => f.id === parseInt(body.emission_factor)) || { name: 'Diesel', carbon_value: '2.68' };
-      const qty = parseFloat(body.quantity || body.distance_traveled || 10);
-      const calcEm = (qty * parseFloat(mockEF.carbon_value)).toFixed(2);
-      
-      const deptList = departments.length ? departments : [{ id: 1, name: 'Logistics' }, { id: 2, name: 'Manufacturing' }];
-      const deptName = deptList.find(d => d.id === parseInt(body.department))?.name || 'Operations';
-      
-      const newTx = {
-        id: Date.now(),
-        date: body.date || new Date().toISOString().split('T')[0],
-        department_name: deptName,
-        record_type: logType === 'purchase' ? 'Purchase' : 'Fleet',
-        item_details: logType === 'purchase' ? body.item_name : `Fleet ID: ${body.vehicle_id}`,
-        calculated_emission: calcEm
-      };
-
-      setTransactions(prev => [newTx, ...prev]);
-      alert(`Simulation: Carbon emissions of ${calcEm} kg CO2 calculated & logged!`);
-      setPurchaseForm({ department: '', item_name: '', amount: '', emission_factor: '', quantity: '', date: '' });
-      setFleetForm({ department: '', vehicle_id: '', distance_traveled: '', fuel_type: '', emission_factor: '', date: '' });
+      if (showToast) showToast("Network error logging operation", 'error');
     }
   };
 
   const getFormDepartments = () => {
-    return departments.length ? departments : [{ id: 1, name: 'Operations' }, { id: 2, name: 'Research & Development' }, { id: 3, name: 'Logistics' }];
+    return departments;
   };
 
   const getFormFactors = () => {
-    return factors.length ? factors : MOCK_FACTORS.map((f, i) => ({ id: i + 1, name: f.name, carbon_value: f.carbon_value }));
+    return factors;
   };
 
   return (
@@ -167,7 +127,7 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
               <button onClick={() => setSubPage('goals')} className="brutalist-button bg-secondary-fixed text-on-secondary-fixed px-4 py-1 text-[10px]">Add Goal</button>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-gutter">
-              {MOCK_GOALS.map((goal, idx) => (
+              {goals.length > 0 ? goals.map((goal, idx) => (
                 <div key={idx} className="brutalist-card p-4 space-y-4">
                   <div className="flex justify-between items-start">
                     <h4 className="font-headline-md uppercase text-base leading-tight">{goal.name}</h4>
@@ -187,7 +147,9 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
                     <span>Tar: {goal.target_value}</span>
                   </div>
                 </div>
-              ))}
+              )) : (
+                <div className="col-span-3 text-center text-sm font-bold uppercase text-on-surface-variant py-10">No goals data available.</div>
+              )}
             </div>
           </section>
 
@@ -198,7 +160,7 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
               <h3 className="font-headline-md uppercase tracking-tight">Product ESG Profiles</h3>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter">
-              {MOCK_PRODUCTS.map((prod, idx) => (
+              {products.map((prod, idx) => (
                 <div key={idx} className="brutalist-card p-6 flex flex-col items-center text-center gap-4 hover:bg-secondary-fixed/5 transition-colors">
                   <div className="w-20 h-20 border-2 border-on-background flex items-center justify-center bg-surface-container-low shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
                     <span className="material-symbols-outlined text-4xl">{prod.icon}</span>
@@ -231,13 +193,15 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
                   </tr>
                 </thead>
                 <tbody className="font-headline-md text-sm">
-                  {MOCK_FACTORS.map((factor, idx) => (
+                  {factors.length > 0 ? factors.map((factor, idx) => (
                     <tr key={idx} className="border-b border-on-background/10 hover:bg-secondary-fixed/10 transition-colors">
                       <td className="p-3">{factor.name}</td>
-                      <td className="p-3 font-mono font-bold">{factor.carbon_value}</td>
+                      <td className="p-3 font-mono font-bold">{factor.carbon_value || factor.co2_equivalent}</td>
                       <td className="p-3 text-on-surface-variant font-label-bold">{factor.unit}</td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr><td colSpan="3" className="p-3 text-center text-sm font-bold uppercase text-on-surface-variant">No factors available</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -271,18 +235,20 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
                 </tr>
               </thead>
               <tbody className="font-headline-md text-sm">
-                {MOCK_DEPARTMENTS.map((dept, idx) => (
+                {departments.length > 0 ? departments.map((dept, idx) => (
                   <tr key={idx} className="border-b border-on-background/10">
                     <td className="p-3 font-bold uppercase">{dept.name}</td>
-                    <td className="p-3 font-mono">{dept.target}</td>
-                    <td className="p-3 font-mono text-error font-bold">{dept.carbon}</td>
+                    <td className="p-3 font-mono">{dept.target || 'N/A'}</td>
+                    <td className="p-3 font-mono text-error font-bold">{dept.carbon || '0'}</td>
                     <td className="p-3">
                       <span className="bg-secondary/20 text-on-secondary-fixed border border-secondary px-2 py-0.5 text-[10px] font-bold">
-                        {dept.status}
+                        {dept.status || 'ACTIVE'}
                       </span>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr><td colSpan="4" className="p-3 text-center text-sm font-bold uppercase text-on-surface-variant">No department data available</td></tr>
+                )}
               </tbody>
             </table>
             <div className="p-2 bg-background border-t border-on-background/10 text-[10px] font-label-bold italic opacity-60">
@@ -400,17 +366,19 @@ export default function Environmental({ subPage, setSubPage, onNavigate }) {
                 </tr>
               </thead>
               <tbody className="text-xs">
-                {transactions.map(t => (
+                {transactions.length > 0 ? transactions.map(t => (
                   <tr key={t.id} className="border-b border-on-surface/10 hover:bg-surface-container-low">
                     <td className="p-3 font-label-bold">{t.date}</td>
-                    <td className="p-3 font-bold uppercase">{t.department_name}</td>
+                    <td className="p-3 font-bold uppercase">{t.department_name || t.department?.name}</td>
                     <td className="p-3">
                       <span className="bg-secondary-container text-on-secondary-container border border-on-surface px-1.5 py-0.5 text-[9px] font-bold uppercase">{t.record_type}</span>
                     </td>
                     <td className="p-3 text-on-surface-variant">{t.item_details}</td>
                     <td className="p-3 font-bold text-right text-secondary font-mono">{parseFloat(t.calculated_emission).toFixed(2)} kg CO2</td>
                   </tr>
-                ))}
+                )) : (
+                  <tr><td colSpan="5" className="p-3 text-center text-sm font-bold uppercase text-on-surface-variant">No transactions available</td></tr>
+                )}
               </tbody>
             </table>
           </div>

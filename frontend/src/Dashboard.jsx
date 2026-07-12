@@ -2,35 +2,20 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = 'http://localhost:8000/api';
 
-const MOCK_DATA = {
-  overall: { environmental_score: 82.0, social_score: 74.0, governance_score: 88.0, total_score: 81.0 },
-  rankings: [
-    { department_name: "Sales", total_score: 38.0 },
-    { department_name: "Manufacturing", total_score: 75.0 },
-    { department_name: "Logistics", total_score: 55.0 },
-    { department_name: "Corporate", total_score: 88.0 },
-    { department_name: "R&D", total_score: 42.0 }
-  ],
-  trend: [
-    { month: "FEB", emissions: 410 },
-    { month: "MAR", emissions: 390 },
-    { month: "APR", emissions: 320 },
-    { month: "MAY", emissions: 280 },
-    { month: "JUN", emissions: 245 },
-    { month: "JUL", emissions: 198 }
-  ],
-  notifications: [
-    { id: 1, message: "CRITICAL WARNING: Compliance issue 'Hazardous Batteries Disposal Proof' is overdue!", created_at: "2026-07-12T11:45:00Z" }
-  ],
-  benchmarks: [
-    { indicator: "Carbon Intensity (tCO2e/$M)", baseline: 450.2, target: 380.0, status: "CRITICAL", class: "bg-error-container text-on-error-container" },
-    { indicator: "Board Diversity (%)", baseline: 18.5, target: 30.0, status: "ON TRACK", class: "bg-secondary-container text-on-secondary-container" },
-    { indicator: "Supply Chain Transparency", baseline: 45.0, target: 85.0, status: "IMPROVING", class: "bg-tertiary-fixed text-on-tertiary-fixed-variant" }
-  ]
-};
+// Mock data removed in favor of direct API connection
 
-export default function Dashboard({ subPage, onNavigate }) {
-  const [data, setData] = useState(MOCK_DATA);
+export default function Dashboard({ subPage, onNavigate, showToast }) {
+  const [data, setData] = useState({
+    overall: { environmental_score: 0, social_score: 0, governance_score: 0, total_score: 0 },
+    rankings: [],
+    trend: [],
+    notifications: [],
+    benchmarks: [
+      { indicator: "Carbon Intensity (tCO2e/$M)", baseline: 450.2, target: 380.0, status: "CRITICAL", class: "bg-error-container text-on-error-container" },
+      { indicator: "Board Diversity (%)", baseline: 18.5, target: 30.0, status: "ON TRACK", class: "bg-secondary-container text-on-secondary-container" },
+      { indicator: "Supply Chain Transparency", baseline: 45.0, target: 85.0, status: "IMPROVING", class: "bg-tertiary-fixed text-on-tertiary-fixed-variant" }
+    ]
+  });
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -46,18 +31,20 @@ export default function Dashboard({ subPage, onNavigate }) {
         setData(prev => ({
           ...prev,
           overall: {
-            environmental_score: parseFloat(result.overall.environmental_score) || 82.0,
-            social_score: parseFloat(result.overall.social_score) || 74.0,
-            governance_score: parseFloat(result.overall.governance_score) || 88.0,
-            total_score: parseFloat(result.overall.total_score) || 81.0
+            environmental_score: parseFloat(result.overall.environmental_score) || 0,
+            social_score: parseFloat(result.overall.social_score) || 0,
+            governance_score: parseFloat(result.overall.governance_score) || 0,
+            total_score: parseFloat(result.overall.total_score) || 0
           },
-          rankings: result.rankings.length ? result.rankings : MOCK_DATA.rankings,
-          trend: result.trend.length ? result.trend.map(t => ({ month: t.month.split('-')[1] || t.month, emissions: t.emissions })) : MOCK_DATA.trend,
-          notifications: result.notifications.length ? result.notifications : MOCK_DATA.notifications
+          rankings: result.rankings || [],
+          trend: result.trend ? result.trend.map(t => ({ month: t.month.split('-')[1] || t.month, emissions: t.emissions })) : [],
+          notifications: result.notifications || []
         }));
+      } else {
+        if (showToast) showToast("Failed to fetch dashboard data.", "error");
       }
     } catch (e) {
-      console.warn("Using mock dashboard data.");
+      if (showToast) showToast("Network error fetching dashboard data.", "error");
     }
     setLoading(false);
   };
@@ -117,9 +104,7 @@ export default function Dashboard({ subPage, onNavigate }) {
   };
 
   const getDeptBarHeight = (score) => {
-    const minHeight = 24;
-    const maxHeight = 56;
-    return `${minHeight + (score / 100) * (maxHeight - minHeight)}px`;
+    return `${Math.max(10, score)}%`;
   };
 
   return (
@@ -198,29 +183,32 @@ export default function Dashboard({ subPage, onNavigate }) {
                   Department ESG Ranking
                 </h3>
               </div>
-              <div className="flex items-end justify-between h-64 px-4 pb-4">
-                {data.rankings.map((dept, idx) => {
-                  const score = dept.total_score || 50;
-                  const isLogistics = dept.department_name.toLowerCase().includes('logi');
-                  const displayName = dept.department_name.substring(0, 4);
+              <div className="flex items-end justify-between h-64 px-4 pb-4 w-full border-b-2 border-on-surface">
+                {data.rankings.length > 0 ? data.rankings.map((dept, idx) => {
+                  const score = parseFloat(dept.total_score) || 0;
+                  const isLogistics = dept.department?.name?.toLowerCase().includes('logi') || (dept.department_name && dept.department_name.toLowerCase().includes('logi'));
+                  const displayName = (dept.department?.name || dept.department_name || `Dept${idx}`).substring(0, 4);
 
                   return (
-                    <div key={idx} className="flex flex-col items-center gap-3 w-14 relative group">
+                    <div key={idx} className="flex flex-col items-center gap-2 w-12 relative group h-full justify-end">
                       {isLogistics && (
-                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-3 py-1 font-bold uppercase whitespace-nowrap z-10 border border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+                        <div className="absolute -top-12 left-1/2 -translate-x-1/2 bg-on-surface text-surface text-[10px] px-3 py-1 font-bold uppercase whitespace-nowrap z-10 border border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hidden group-hover:block">
                           Generous Kingfisher
                         </div>
                       )}
+                      <div className="absolute -top-6 text-[10px] font-bold hidden group-hover:block">{score.toFixed(0)}</div>
                       <div
                         style={{ height: getDeptBarHeight(score) }}
                         className={`w-full border-2 border-on-surface transition-all duration-300 ${
-                          idx % 2 === 0 ? 'bg-surface-container' : 'bg-primary-container'
+                          idx % 2 === 0 ? 'bg-surface-variant' : 'bg-primary'
                         }`}
                       ></div>
-                      <span className="text-[10px] font-black uppercase text-on-surface">{displayName}</span>
+                      <span className="text-[9px] font-black uppercase text-on-surface mt-1">{displayName}</span>
                     </div>
                   );
-                })}
+                }) : (
+                  <div className="w-full text-center text-sm font-bold uppercase text-on-surface-variant py-10">No department data available.</div>
+                )}
               </div>
             </section>
           </div>
