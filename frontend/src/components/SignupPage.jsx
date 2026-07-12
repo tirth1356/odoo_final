@@ -2,14 +2,17 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 
-export default function LoginPage() {
+export default function SignupPage() {
+  const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [rememberTerminal, setRememberTerminal] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isEmailFocused, setIsEmailFocused] = useState(false);
+  const [isUsernameFocused, setIsUsernameFocused] = useState(false);
   const [isPasswordFocused, setIsPasswordFocused] = useState(false);
-
+  const [isConfirmPasswordFocused, setIsConfirmPasswordFocused] = useState(false);
+  
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -18,31 +21,38 @@ export default function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !password) {
-      setError("Please fill in both Email and Access Key.");
-      alert("Please fill in both Email and Access Key.");
+    if (!username || !email || !password || !confirmPassword) {
+      setError("Please fill in all fields.");
       return;
     }
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
     setLoading(true);
     setError(null);
     setSuccess(null);
 
     try {
       const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-      const response = await axios.post(`${apiUrl}/api/auth/login/`, {
-        username: email, // Assuming email is used as username for now or they just use username in email field
+      await axios.post(`${apiUrl}/api/auth/register/`, {
+        username,
+        email,
         password
       });
-      // Store token
-      localStorage.setItem('access_token', response.data.access);
-      localStorage.setItem('refresh_token', response.data.refresh);
-      
-      setSuccess("Login successful! Welcome to ESG Core.");
-      // Navigate to dashboard after a short delay
-      setTimeout(() => navigate('/app'), 1000);
+      setSuccess("Registration successful! Please sign in with your new credentials.");
+      // Navigate to login after a short delay
+      setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
       console.error(err);
-      setError("Invalid credentials. Access denied.");
+      if (err.response && err.response.data) {
+        // Basic error formatting from DRF
+        const msgs = Object.values(err.response.data).flat();
+        setError(msgs.join(" "));
+      } else {
+        setError("An error occurred during registration.");
+      }
     } finally {
       setLoading(false);
     }
@@ -77,16 +87,12 @@ export default function LoginPage() {
               <h1 className="font-display-lg text-display-lg uppercase leading-none mb-4">ESG<br />RESOLVE</h1>
               <div className="h-1 w-24 bg-on-surface mb-8"></div>
               <p className="font-body-lg text-body-lg text-on-surface mb-8">
-                The definitive operating system for environmental, social, and governance intelligence.
+                Join the definitive operating system for environmental, social, and governance intelligence.
               </p>
               <div className="flex items-center gap-4">
                 <span className="material-symbols-outlined text-4xl text-secondary">verified_user</span>
                 <span className="font-label-bold text-label-bold uppercase text-on-surface-variant">Military-Grade Encryption Standard</span>
               </div>
-            </div>
-            {/* Decorative Elements */}
-            <div className="absolute -top-10 -right-10 w-40 h-40 border-2 border-on-surface/20 flex items-center justify-center -rotate-12">
-              <span className="font-headline-lg text-headline-lg-mobile text-on-surface/10 uppercase">AUTHENTICATED</span>
             </div>
           </div>
           {/* Background Image Integration */}
@@ -98,17 +104,12 @@ export default function LoginPage() {
           />
         </section>
 
-        {/* Right Side: Login Form */}
+        {/* Right Side: Signup Form */}
         <section className="w-full md:w-1/2 flex flex-col justify-center items-center p-margin-mobile md:p-margin-desktop bg-surface-container">
-          {/* Mobile Branding Only */}
-          <div className="md:hidden mb-12 text-center">
-            <h1 className="font-headline-lg text-headline-lg-mobile uppercase mb-2">ESG RESOLVE</h1>
-            <p className="font-label-bold text-label-bold uppercase text-primary">Secure Institutional Access</p>
-          </div>
           <div className="w-full max-w-md bg-background border-[3px] border-on-surface p-8 brutalist-shadow transition-all duration-300">
             <header className="mb-8 border-b-2 border-on-surface pb-6">
-              <h2 className="font-headline-md text-headline-md uppercase mb-1">SIGN IN</h2>
-              <p className="font-label-bold text-label-bold text-on-surface-variant">AUTHORIZED PERSONNEL ONLY</p>
+              <h2 className="font-headline-md text-headline-md uppercase mb-1">REGISTER</h2>
+              <p className="font-label-bold text-label-bold text-on-surface-variant">CREATE INSTITUTIONAL ACCESS</p>
             </header>
 
             {error && (
@@ -124,14 +125,41 @@ export default function LoginPage() {
             )}
 
             <form className="space-y-6" onSubmit={handleSubmit}>
-              {/* Institutional Email/ID */}
+              
+              {/* Username */}
+              <div className="space-y-2">
+                <label
+                  className={`block font-label-bold text-label-bold uppercase transition-colors ${isUsernameFocused ? 'text-secondary' : 'text-on-surface'
+                    }`}
+                  htmlFor="username"
+                >
+                  USERNAME
+                </label>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant">person</span>
+                  <input
+                    className="w-full bg-surface-container-low border-2 border-on-surface px-12 py-4 font-body-md focus:outline-none focus:ring-0 focus:border-secondary transition-colors"
+                    id="username"
+                    name="username"
+                    placeholder="USERNAME_XXXXXX"
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    onFocus={() => setIsUsernameFocused(true)}
+                    onBlur={() => setIsUsernameFocused(false)}
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Email */}
               <div className="space-y-2">
                 <label
                   className={`block font-label-bold text-label-bold uppercase transition-colors ${isEmailFocused ? 'text-secondary' : 'text-on-surface'
                     }`}
                   htmlFor="email"
                 >
-                  INSTITUTIONAL EMAIL/ID
+                  INSTITUTIONAL EMAIL
                 </label>
                 <div className="relative">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant">alternate_email</span>
@@ -139,8 +167,8 @@ export default function LoginPage() {
                     className="w-full bg-surface-container-low border-2 border-on-surface px-12 py-4 font-body-md focus:outline-none focus:ring-0 focus:border-secondary transition-colors"
                     id="email"
                     name="email"
-                    placeholder="ID_REF_XXXXXX"
-                    type="text"
+                    placeholder="name@institution.edu"
+                    type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setIsEmailFocused(true)}
@@ -150,7 +178,7 @@ export default function LoginPage() {
                 </div>
               </div>
 
-              {/* Access Key/Password */}
+              {/* Password */}
               <div className="space-y-2">
                 <div className="flex justify-between items-end">
                   <label
@@ -185,6 +213,34 @@ export default function LoginPage() {
                 </div>
               </div>
 
+              {/* Confirm Password */}
+              <div className="space-y-2">
+                <div className="flex justify-between items-end">
+                  <label
+                    className={`block font-label-bold text-label-bold uppercase transition-colors ${isConfirmPasswordFocused ? 'text-secondary' : 'text-on-surface'
+                      }`}
+                    htmlFor="confirmPassword"
+                  >
+                    CONFIRM ACCESS KEY
+                  </label>
+                </div>
+                <div className="relative">
+                  <span className="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant">lock</span>
+                  <input
+                    className="w-full bg-surface-container-low border-2 border-on-surface px-12 py-4 font-body-md focus:outline-none focus:ring-0 focus:border-secondary transition-colors"
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    placeholder="••••••••••••"
+                    type={showPassword ? "text" : "password"}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onFocus={() => setIsConfirmPasswordFocused(true)}
+                    onBlur={() => setIsConfirmPasswordFocused(false)}
+                    required
+                  />
+                </div>
+              </div>
+
               {/* Actions */}
               <div className="pt-4 flex flex-col gap-4">
                 <button
@@ -192,24 +248,15 @@ export default function LoginPage() {
                   type="submit"
                   disabled={loading}
                 >
-                  {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
+                  {loading ? 'PROCESSING...' : 'REGISTER'}
                 </button>
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
+                <div className="text-center mt-2">
                   <Link
-                    to="/signup"
+                    to="/login"
                     className="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors border-b-2 border-transparent hover:border-tertiary"
                   >
-                    NO ACCESS? REGISTER HERE
+                    ALREADY HAVE ACCESS? SIGN IN
                   </Link>
-                  <label className="flex items-center gap-2 cursor-pointer group">
-                    <input
-                      className="w-5 h-5 border-2 border-on-surface bg-surface-container-low checked:bg-secondary checked:border-on-surface appearance-none rounded-none transition-colors"
-                      type="checkbox"
-                      checked={rememberTerminal}
-                      onChange={(e) => setRememberTerminal(e.target.checked)}
-                    />
-                    <span className="font-label-bold text-label-bold uppercase text-on-surface-variant group-hover:text-on-surface">REMEMBER TERMINAL</span>
-                  </label>
                 </div>
               </div>
             </form>
@@ -218,30 +265,12 @@ export default function LoginPage() {
             <div className="mt-12 p-4 bg-surface-container-highest border border-on-surface-variant/20 flex gap-4 items-start">
               <span className="material-symbols-outlined text-error mt-1">gpp_maybe</span>
               <p className="font-label-bold text-[10px] leading-tight text-on-surface-variant opacity-80">
-                BY PROCEEDING, YOU ACKNOWLEDGE THAT SYSTEM ACCESS IS LOGGED AND MONITORED. UNAUTHORIZED ATTEMPTS ARE SUBJECT TO INSTITUTIONAL REVIEW UNDER THE SECURITY PROTOCOL CORE-8.
+                BY PROCEEDING, YOU ACKNOWLEDGE THAT SYSTEM ACCESS IS LOGGED AND MONITORED.
               </p>
             </div>
           </div>
-
-          {/* Footer for Mobile */}
-          <div className="md:hidden mt-8 text-center px-4 opacity-50">
-            <p className="font-label-bold text-[10px] uppercase">© 2024 ESG CORE SYSTEMS. ALL RIGHTS RESERVED.</p>
-          </div>
         </section>
       </main>
-
-      {/* Footer */}
-      <footer className="w-full bg-surface-container-highest border-t-2 border-on-surface px-margin-mobile md:px-margin-desktop py-8 flex flex-col md:flex-row justify-between gap-gutter z-10">
-        <div className="flex flex-col gap-2">
-          <span className="font-headline-md text-headline-md text-on-surface">ESG CORE SYSTEMS</span>
-          <span className="font-label-bold text-label-bold uppercase text-on-surface-variant">© 2024 ESG CORE SYSTEMS. ALL RIGHTS RESERVED.</span>
-        </div>
-        <div className="flex flex-wrap gap-x-gutter gap-y-4 items-center">
-          <a className="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors" href="#privacy">PRIVACY POLICY</a>
-          <a className="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors" href="#terms">TERMS OF SERVICE</a>
-          <a className="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors" href="#security">INSTITUTIONAL SECURITY</a>
-        </div>
-      </footer>
     </div>
   );
 }

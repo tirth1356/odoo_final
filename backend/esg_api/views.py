@@ -6,10 +6,13 @@ from django.contrib.auth.models import User
 from django.db.models import Sum, Avg, Q
 from django.utils import timezone
 from django.http import HttpResponse, StreamingHttpResponse
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import AllowAny
+
+from .serializers import UserRegistrationSerializer
 
 from .models import (
     Department, Category, EmissionFactor, ProductESGProfile,
@@ -35,6 +38,11 @@ from .serializers import (
     RewardRedemptionSerializer, DepartmentScoreSerializer,
     OrganizationWeightConfigSerializer, OverallESGScoreSerializer
 )
+
+class UserRegistrationView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = (AllowAny,)
+    serializer_class = UserRegistrationSerializer
 
 # Helper function to check and flag compliance issues
 def check_compliance_deadlines():
