@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
 const MOCK_DEPARTMENTS = [
   { id: 1, name: "Manufacturing", code: "MFG", head: "S. Nair", parent: "—", employees: 132, status: "Active" },
@@ -23,6 +26,21 @@ export default function Settings({
   const [activeTab, setActiveTab] = useState('departments'); // departments, categories, esg, notifications
   const [departmentsList, setDepartmentsList] = useState(MOCK_DEPARTMENTS);
   const [searchQuery, setSearchQuery] = useState('');
+
+  // Local state for toggles to prevent immediate saving without clicking "Save"
+  const [localAutoEmission, setLocalAutoEmission] = useState(autoEmission);
+  const [localEvidenceReq, setLocalEvidenceReq] = useState(evidenceReq);
+  const [localBadgeAuto, setLocalBadgeAuto] = useState(badgeAuto);
+  const [localNotifSettings, setLocalNotifSettings] = useState(notifSettings);
+
+  useEffect(() => {
+    if (isOpen) {
+      setLocalAutoEmission(autoEmission);
+      setLocalEvidenceReq(evidenceReq);
+      setLocalBadgeAuto(badgeAuto);
+      setLocalNotifSettings(notifSettings);
+    }
+  }, [isOpen, autoEmission, evidenceReq, badgeAuto, notifSettings]);
 
   if (!isOpen) return null;
 
@@ -54,6 +72,40 @@ export default function Settings({
 
     setDepartmentsList(prev => [...prev, newDept]);
     safeToast(`Created Department: ${name}`, 'success');
+  };
+
+  const handleSaveSettings = async () => {
+    try {
+      const payload = {
+        auto_emission_calculation: localAutoEmission,
+        evidence_requirement: localEvidenceReq,
+        badge_auto_award: localBadgeAuto,
+        notify_new_compliance: localNotifSettings.compliance,
+        notify_csr_approval: localNotifSettings.csr,
+        notify_policy_reminders: localNotifSettings.reminders,
+        notify_badge_unlocks: localNotifSettings.badges
+      };
+      
+      const res = await axios.patch(`${API_BASE}/system/config/`, payload);
+      const cfg = res.data;
+
+      // Update parent states
+      setAutoEmission(cfg.auto_emission_calculation);
+      setEvidenceReq(cfg.evidence_requirement);
+      setBadgeAuto(cfg.badge_auto_award);
+      setNotifSettings({
+        compliance: cfg.notify_new_compliance,
+        csr: cfg.notify_csr_approval,
+        reminders: cfg.notify_policy_reminders,
+        badges: cfg.notify_badge_unlocks
+      });
+
+      safeToast('Configuration Settings Saved!', 'success');
+      onClose();
+    } catch (e) {
+      console.error(e);
+      safeToast('Failed to save settings.', 'error');
+    }
   };
 
   const filteredDepts = departmentsList.filter(d => 
@@ -215,29 +267,27 @@ export default function Settings({
             </div>
           )}
 
-          {(activeTab === 'esg' || activeTab === 'notifications') && (
+          {activeTab === 'esg' && (
             <div className="space-y-10">
-              {/* Toggle Controls */}
               <section className="space-y-6">
                 <h2 className="font-headline-md text-headline-md uppercase border-b-2 border-on-surface pb-2 inline-block">
-                  ESG Configuration &amp; Notifications Settings
+                  ESG Configuration Toggles
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                  {/* Toggle Group 1 */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
                       <span className="font-label-bold text-label-bold uppercase text-xs">Enable auto emission calculation</span>
                       <label className="relative inline-block w-12 h-6">
                         <input
-                          checked={autoEmission}
-                          onChange={e => setAutoEmission(e.target.checked)}
+                          checked={localAutoEmission}
+                          onChange={e => setLocalAutoEmission(e.target.checked)}
                           className="sr-only neo-toggle"
                           type="checkbox"
                         />
                         <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
-                          autoEmission ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                          localAutoEmission ? 'bg-[#38fe13]' : 'bg-surface-container-high'
                         } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
-                          autoEmission ? 'before:translate-x-5' : ''
+                          localAutoEmission ? 'before:translate-x-5' : ''
                         }`}></div>
                       </label>
                     </div>
@@ -246,89 +296,120 @@ export default function Settings({
                       <span className="font-label-bold text-label-bold uppercase text-xs">Require evidence for all CSR activities</span>
                       <label className="relative inline-block w-12 h-6">
                         <input
-                          checked={evidenceReq}
-                          onChange={e => setEvidenceReq(e.target.checked)}
+                          checked={localEvidenceReq}
+                          onChange={e => setLocalEvidenceReq(e.target.checked)}
                           className="sr-only neo-toggle"
                           type="checkbox"
                         />
                         <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
-                          evidenceReq ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                          localEvidenceReq ? 'bg-[#38fe13]' : 'bg-surface-container-high'
                         } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
-                          evidenceReq ? 'before:translate-x-5' : ''
+                          localEvidenceReq ? 'before:translate-x-5' : ''
                         }`}></div>
                       </label>
                     </div>
                   </div>
 
-                  {/* Toggle Group 2 */}
                   <div className="space-y-4">
                     <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
-                      <span className="font-label-bold text-label-bold uppercase text-xs">Auto-award badges on challenge completion</span>
+                      <span className="font-label-bold text-label-bold uppercase text-xs">Auto-award badges on metrics matching</span>
                       <label className="relative inline-block w-12 h-6">
                         <input
-                          checked={badgeAuto}
-                          onChange={e => setBadgeAuto(e.target.checked)}
+                          checked={localBadgeAuto}
+                          onChange={e => setLocalBadgeAuto(e.target.checked)}
                           className="sr-only neo-toggle"
                           type="checkbox"
                         />
                         <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
-                          badgeAuto ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                          localBadgeAuto ? 'bg-[#38fe13]' : 'bg-surface-container-high'
                         } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
-                          badgeAuto ? 'before:translate-x-5' : ''
-                        }`}></div>
-                      </label>
-                    </div>
-
-                    <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
-                      <span className="font-label-bold text-label-bold uppercase text-xs">Email alerts for new compliance issues</span>
-                      <label className="relative inline-block w-12 h-6">
-                        <input
-                          checked={notifSettings.compliance}
-                          onChange={e => setNotifSettings(prev => ({ ...prev, compliance: e.target.checked }))}
-                          className="sr-only neo-toggle"
-                          type="checkbox"
-                        />
-                        <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
-                          notifSettings.compliance ? 'bg-[#38fe13]' : 'bg-surface-container-high'
-                        } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
-                          notifSettings.compliance ? 'before:translate-x-5' : ''
+                          localBadgeAuto ? 'before:translate-x-5' : ''
                         }`}></div>
                       </label>
                     </div>
                   </div>
                 </div>
               </section>
+            </div>
+          )}
 
-              {/* Data Visualization Section */}
-              <section className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
-                <div className="col-span-1 md:col-span-2 border-2 border-on-surface bg-surface p-6 shadow-[4px_4px_0px_0px_rgba(28,27,27,1)]">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-label-bold text-label-bold uppercase text-xs">System Performance Analytics</h3>
-                    <span className="material-symbols-outlined text-secondary">trending_up</span>
-                  </div>
-                  <div className="h-40 flex items-end gap-2 border-b border-on-surface/20">
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[40%] transition-all hover:h-[45%]"></div>
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[60%] transition-all hover:h-[65%]"></div>
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[30%] transition-all hover:h-[35%]"></div>
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[80%] transition-all hover:h-[85%]"></div>
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[55%] transition-all hover:h-[60%]"></div>
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[90%] transition-all hover:h-[95%]"></div>
-                    <div className="flex-1 bg-secondary-fixed border-2 border-on-surface h-[70%] transition-all hover:h-[75%]"></div>
-                  </div>
-                  <div className="mt-2 flex justify-between font-label-bold text-[10px] uppercase text-on-surface-variant">
-                    <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
-                  </div>
-                </div>
-                <div className="bg-on-surface text-surface p-6 flex flex-col justify-between shadow-[4px_4px_0px_0px_rgba(28,27,27,1)]">
-                  <div>
-                    <h3 className="font-label-bold text-label-bold uppercase text-surface-variant text-xs">Data Integrity</h3>
-                    <div className="text-4xl font-headline-lg mt-2">99.8%</div>
-                  </div>
-                  <div className="mt-4">
-                    <div className="h-2 w-full bg-surface-container-high overflow-hidden">
-                      <div className="h-full bg-secondary-fixed w-[99.8%]"></div>
+          {activeTab === 'notifications' && (
+            <div className="space-y-10">
+              <section className="space-y-6">
+                <h2 className="font-headline-md text-headline-md uppercase border-b-2 border-on-surface pb-2 inline-block">
+                  Notification Settings
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
+                      <span className="font-label-bold text-label-bold uppercase text-xs">Alerts for new compliance issues</span>
+                      <label className="relative inline-block w-12 h-6">
+                        <input
+                          checked={localNotifSettings.compliance}
+                          onChange={e => setLocalNotifSettings(prev => ({ ...prev, compliance: e.target.checked }))}
+                          className="sr-only neo-toggle"
+                          type="checkbox"
+                        />
+                        <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
+                          localNotifSettings.compliance ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                        } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
+                          localNotifSettings.compliance ? 'before:translate-x-5' : ''
+                        }`}></div>
+                      </label>
                     </div>
-                    <p className="mt-2 font-label-bold text-[10px] uppercase">Verified Institutional Node</p>
+
+                    <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
+                      <span className="font-label-bold text-label-bold uppercase text-xs">Alerts for CSR / Challenge approval decisions</span>
+                      <label className="relative inline-block w-12 h-6">
+                        <input
+                          checked={localNotifSettings.csr}
+                          onChange={e => setLocalNotifSettings(prev => ({ ...prev, csr: e.target.checked }))}
+                          className="sr-only neo-toggle"
+                          type="checkbox"
+                        />
+                        <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
+                          localNotifSettings.csr ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                        } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
+                          localNotifSettings.csr ? 'before:translate-x-5' : ''
+                        }`}></div>
+                      </label>
+                    </div>
+                  </div>
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
+                      <span className="font-label-bold text-label-bold uppercase text-xs">Policy acknowledgement reminders</span>
+                      <label className="relative inline-block w-12 h-6">
+                        <input
+                          checked={localNotifSettings.reminders}
+                          onChange={e => setLocalNotifSettings(prev => ({ ...prev, reminders: e.target.checked }))}
+                          className="sr-only neo-toggle"
+                          type="checkbox"
+                        />
+                        <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
+                          localNotifSettings.reminders ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                        } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
+                          localNotifSettings.reminders ? 'before:translate-x-5' : ''
+                        }`}></div>
+                      </label>
+                    </div>
+
+                    <div className="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card transition-all">
+                      <span className="font-label-bold text-label-bold uppercase text-xs">Alerts for Badge unlocks</span>
+                      <label className="relative inline-block w-12 h-6">
+                        <input
+                          checked={localNotifSettings.badges}
+                          onChange={e => setLocalNotifSettings(prev => ({ ...prev, badges: e.target.checked }))}
+                          className="sr-only neo-toggle"
+                          type="checkbox"
+                        />
+                        <div className={`neo-slider absolute inset-0 cursor-pointer border-2 border-on-surface transition-all ${
+                          localNotifSettings.badges ? 'bg-[#38fe13]' : 'bg-surface-container-high'
+                        } before:absolute before:h-4 before:w-4 before:left-1 before:bottom-1 before:bg-on-surface before:transition-all ${
+                          localNotifSettings.badges ? 'before:translate-x-5' : ''
+                        }`}></div>
+                      </label>
+                    </div>
                   </div>
                 </div>
               </section>
@@ -347,10 +428,7 @@ export default function Settings({
               Cancel changes
             </button>
             <button
-              onClick={() => {
-                safeToast('Configuration Settings Saved!', 'success');
-                onClose();
-              }}
+              onClick={handleSaveSettings}
               className="px-10 py-4 bg-secondary-fixed text-on-secondary-fixed border-2 border-on-surface font-headline-md text-headline-md uppercase shadow-[6px_6px_0px_0px_rgba(28,27,27,1)] hover:shadow-[8px_8px_0px_0px_rgba(28,27,27,1)] active:translate-x-1.5 active:translate-y-1.5 active:shadow-none transition-all"
             >
               Save

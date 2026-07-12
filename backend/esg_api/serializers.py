@@ -8,7 +8,7 @@ from .models import (
     DiversityMetrics, TrainingCompletion, PolicyAcknowledgement, Audit,
     ComplianceIssue, Notification, Challenge, ChallengeParticipation,
     EmployeeProfile, BadgeAward, RewardRedemption, DepartmentScore,
-    OrganizationWeightConfig, OverallESGScore
+    OrganizationWeightConfig, OverallESGScore, SystemConfig
 )
 
 class UserSerializer(serializers.ModelSerializer):
@@ -229,6 +229,15 @@ class OrganizationWeightConfigSerializer(serializers.ModelSerializer):
     class Meta:
         model = OrganizationWeightConfig
         fields = '__all__'
+
+class SystemConfigSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SystemConfig
+        fields = [
+            'id', 'auto_emission_calculation', 'evidence_requirement',
+            'badge_auto_award', 'notify_new_compliance', 'notify_csr_approval',
+            'notify_policy_reminders', 'notify_badge_unlocks',
+        ]
 
 class OverallESGScoreSerializer(serializers.ModelSerializer):
     class Meta:

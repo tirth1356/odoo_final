@@ -396,6 +396,31 @@ class OrganizationWeightConfig(models.Model):
     def __str__(self):
         return f"Weights - E: {self.environmental_weight}, S: {self.social_weight}, G: {self.governance_weight}"
 
+
+class SystemConfig(models.Model):
+    auto_emission_calculation = models.BooleanField(default=True)
+    evidence_requirement = models.BooleanField(default=False)
+    badge_auto_award = models.BooleanField(default=True)
+    notify_new_compliance = models.BooleanField(default=True)
+    notify_csr_approval = models.BooleanField(default=True)
+    notify_policy_reminders = models.BooleanField(default=True)
+    notify_badge_unlocks = models.BooleanField(default=True)
+
+    class Meta:
+        verbose_name = 'System Configuration'
+
+    def save(self, *args, **kwargs):
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_solo(cls):
+        obj, _ = cls.objects.get_or_create(pk=1)
+        return obj
+
+    def __str__(self):
+        return "System Configuration"
+
 class OverallESGScore(models.Model):
     environmental_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
     social_score = models.DecimalField(max_digits=5, decimal_places=2, default=0.0)
@@ -419,9 +444,15 @@ def create_employee_profile(sender, instance, created, **kwargs):
     if created:
         EmployeeProfile.objects.create(user=instance)
 
+def _auto_emission_enabled():
+    return SystemConfig.get_solo().auto_emission_calculation
+
+
 # Post-Save Signals to Automatically Log Carbon Transactions
 @receiver(post_save, sender=PurchaseRecord)
 def log_purchase_carbon(sender, instance, created, **kwargs):
+    if not _auto_emission_enabled():
+        return
     CarbonTransaction.objects.update_or_create(
         record_type='Purchase',
         record_id=instance.id,
@@ -436,6 +467,8 @@ def log_purchase_carbon(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=ManufacturingRecord)
 def log_mfg_carbon(sender, instance, created, **kwargs):
+    if not _auto_emission_enabled():
+        return
     CarbonTransaction.objects.update_or_create(
         record_type='Manufacturing',
         record_id=instance.id,
@@ -450,6 +483,8 @@ def log_mfg_carbon(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=ExpenseRecord)
 def log_expense_carbon(sender, instance, created, **kwargs):
+    if not _auto_emission_enabled():
+        return
     CarbonTransaction.objects.update_or_create(
         record_type='Expense',
         record_id=instance.id,
@@ -464,7 +499,8 @@ def log_expense_carbon(sender, instance, created, **kwargs):
 
 @receiver(post_save, sender=FleetRecord)
 def log_fleet_carbon(sender, instance, created, **kwargs):
-    # Fleet records calculate emissions based on distance. Let's log it.
+    if not _auto_emission_enabled():
+        return
     import datetime
     today = datetime.date.today()
     CarbonTransaction.objects.update_or_create(

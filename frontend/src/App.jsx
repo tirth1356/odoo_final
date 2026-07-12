@@ -122,12 +122,13 @@ function MainApp() {
 
   const fetchGlobalData = async () => {
     try {
-      const [resDepts, resRewards, resCh, resDash, resProfile] = await Promise.all([
+      const [resDepts, resRewards, resCh, resDash, resProfile, resConfig] = await Promise.all([
         axios.get(`${API_BASE}/departments/`),
         axios.get(`${API_BASE}/rewards/`),
         axios.get(`${API_BASE}/challenges/`),
         axios.get(`${API_BASE}/system/dashboard/`),
-        axios.get(`${API_BASE}/employee-profiles/current/`)
+        axios.get(`${API_BASE}/employee-profiles/current/`),
+        axios.get(`${API_BASE}/system/config/`)
       ]);
       setDepartments(resDepts.data);
       setRewards(resRewards.data);
@@ -141,6 +142,17 @@ function MainApp() {
         username: p.user?.username || "user",
         points: p.points,
         xp: p.xp
+      });
+
+      const cfg = resConfig.data;
+      setAutoEmission(cfg.auto_emission_calculation);
+      setEvidenceReq(cfg.evidence_requirement);
+      setBadgeAuto(cfg.badge_auto_award);
+      setNotifSettings({
+        compliance: cfg.notify_new_compliance,
+        csr: cfg.notify_csr_approval,
+        reminders: cfg.notify_policy_reminders,
+        badges: cfg.notify_badge_unlocks
       });
     } catch (e) {
       console.warn("Failed to fetch global data:", e);

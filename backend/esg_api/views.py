@@ -22,7 +22,7 @@ from .models import (
     DiversityMetrics, TrainingCompletion, PolicyAcknowledgement, Audit,
     ComplianceIssue, Notification, Challenge, ChallengeParticipation,
     EmployeeProfile, BadgeAward, RewardRedemption, DepartmentScore,
-    OrganizationWeightConfig, OverallESGScore
+    OrganizationWeightConfig, OverallESGScore, SystemConfig
 )
 
 from .serializers import (
@@ -36,7 +36,8 @@ from .serializers import (
     ComplianceIssueSerializer, NotificationSerializer, ChallengeSerializer,
     ChallengeParticipationSerializer, EmployeeProfileSerializer, BadgeAwardSerializer,
     RewardRedemptionSerializer, DepartmentScoreSerializer,
-    OrganizationWeightConfigSerializer, OverallESGScoreSerializer
+    OrganizationWeightConfigSerializer, OverallESGScoreSerializer,
+    SystemConfigSerializer
 )
 
 class UserRegistrationView(generics.CreateAPIView):
@@ -46,28 +47,64 @@ class UserRegistrationView(generics.CreateAPIView):
 
 # Helper function to check and flag compliance issues
 def check_compliance_deadlines():
+    config = SystemConfig.get_solo()
     today = datetime.date.today()
-    overdue_issues = ComplianceIssue.objects.filter(
+    overdue_issues = list(ComplianceIssue.objects.filter(
         due_date__lt=today,
         status='Open'
-    )
-    for issue in overdue_issues:
-        issue.status = 'Flagged'
-        issue.save()
-        # Create notification for owner
-        Notification.objects.get_or_create(
-            user=issue.owner,
-            message=f"CRITICAL WARNING: Compliance issue '{issue.title}' is overdue! Status set to Flagged.",
-            defaults={'is_read': False}
-        )
+    ).select_related('owner'))
+    
+    if not overdue_issues:
+        return
+
+    # Bulk update status to Flagged
+    ComplianceIssue.objects.filter(id__in=[issue.id for issue in overdue_issues]).update(status='Flagged')
+
+    if config.notify_new_compliance:
+        notifications_to_create = []
+        for issue in overdue_issues:
+            msg = f"CRITICAL WARNING: Compliance issue '{issue.title}' is overdue! Status set to Flagged."
+            # Avoid duplicate notification if it already exists
+            if not Notification.objects.filter(user=issue.owner, message=msg).exists():
+                notifications_to_create.append(Notification(user=issue.owner, message=msg, is_read=False))
+        if notifications_to_create:
+            Notification.objects.bulk_create(notifications_to_create)
+
+
+
+def check_policy_reminders():
+    config = SystemConfig.get_solo()
+    if not config.notify_policy_reminders:
+        return
+    active_policies = ESGPolicy.objects.filter(status='Active')
+    for policy in active_policies:
+        acked_user_ids = PolicyAcknowledgement.objects.filter(
+            policy=policy
+        ).values_list('employee_id', flat=True)
+        pending_users = User.objects.filter(is_superuser=False).exclude(id__in=acked_user_ids)
+        for user in pending_users:
+            Notification.objects.get_or_create(
+                user=user,
+                message=f"Reminder: Please acknowledge policy '{policy.title}'.",
+                defaults={'is_read': False}
+            )
+
+
+def send_notification(user, message, enabled=True):
+    if enabled:
+        Notification.objects.create(user=user, message=message)
+
 
 # Helper function to check and auto-unlock badges
 def check_badge_unlocks(user):
+    config = SystemConfig.get_solo()
+    if not config.badge_auto_award:
+        return
+
     profile = user.esg_profile
     badges = Badge.objects.all()
     
     for badge in badges:
-        # Check if already awarded
         if BadgeAward.objects.filter(employee=user, badge=badge).exists():
             continue
             
@@ -84,9 +121,10 @@ def check_badge_unlocks(user):
                 
         if unlocked:
             BadgeAward.objects.create(employee=user, badge=badge)
-            Notification.objects.create(
-                user=user,
-                message=f"CONGRATULATIONS! You have unlocked the '{badge.name}' badge!"
+            send_notification(
+                user,
+                f"CONGRATULATIONS! You have unlocked the '{badge.name}' badge!",
+                config.notify_badge_unlocks
             )
 
 # ==========================================
@@ -160,44 +198,63 @@ class EmployeeParticipationViewSet(viewsets.ModelViewSet):
     queryset = EmployeeParticipation.objects.all()
     serializer_class = EmployeeParticipationSerializer
 
+    def _validate_evidence_for_approval(self, approval_status, proof_description, proof_file_url):
+        config = SystemConfig.get_solo()
+        if approval_status == 'Approved' and config.evidence_requirement:
+            if not proof_description and not proof_file_url:
+                raise ValidationError(
+                    "Evidence is required to approve CSR participation. "
+                    "Please attach a proof file or description."
+                )
+
     def perform_create(self, serializer):
+        data = serializer.validated_data
+        self._validate_evidence_for_approval(
+            data.get('approval_status', 'Pending'),
+            data.get('proof_description'),
+            data.get('proof_file_url'),
+        )
         participation = serializer.save()
-        # If auto-approved (e.g. no evidence req or manually pre-approved)
         if participation.approval_status == 'Approved':
             self.apply_csr_rewards(participation)
 
     def perform_update(self, serializer):
         old_status = self.get_object().approval_status
+        instance = self.get_object()
+        data = serializer.validated_data
+        new_status = data.get('approval_status', old_status)
+        self._validate_evidence_for_approval(
+            new_status,
+            data.get('proof_description', instance.proof_description),
+            data.get('proof_file_url', instance.proof_file_url),
+        )
         participation = serializer.save()
-        new_status = participation.approval_status
         
-        # When status moves to Approved
-        if old_status != 'Approved' and new_status == 'Approved':
+        if old_status != 'Approved' and participation.approval_status == 'Approved':
             self.apply_csr_rewards(participation)
 
     def apply_csr_rewards(self, participation):
         activity = participation.csr_activity
         employee = participation.employee
         profile = employee.esg_profile
+        config = SystemConfig.get_solo()
         
-        # Earn points and XP
         participation.points_earned = activity.points_earned
         participation.xp_earned = activity.xp_earned
         participation.save()
         
-        # Update Profile
         profile.points += activity.points_earned
         profile.xp += activity.xp_earned
         profile.completed_csr_activities_count += 1
         profile.save()
         
-        # Create notifications
-        Notification.objects.create(
-            user=employee,
-            message=f"Your participation in CSR '{activity.title}' was approved! Earned {activity.points_earned} points and {activity.xp_earned} XP."
+        send_notification(
+            employee,
+            f"Your participation in CSR '{activity.title}' was approved! "
+            f"Earned {activity.points_earned} points and {activity.xp_earned} XP.",
+            config.notify_csr_approval
         )
         
-        # Check badges
         check_badge_unlocks(employee)
 
 class DiversityMetricsViewSet(viewsets.ModelViewSet):
@@ -220,6 +277,27 @@ class AuditViewSet(viewsets.ModelViewSet):
 class ComplianceIssueViewSet(viewsets.ModelViewSet):
     queryset = ComplianceIssue.objects.all()
     serializer_class = ComplianceIssueSerializer
+
+    def perform_create(self, serializer):
+        if not serializer.validated_data.get('owner'):
+            raise ValidationError("Every compliance issue must have an assigned owner.")
+        if not serializer.validated_data.get('due_date'):
+            raise ValidationError("Every compliance issue must have a due date.")
+        issue = serializer.save()
+        config = SystemConfig.get_solo()
+        send_notification(
+            issue.owner,
+            f"New compliance issue assigned: '{issue.title}'. Due: {issue.due_date}.",
+            config.notify_new_compliance
+        )
+
+    def list(self, request, *args, **kwargs):
+        check_compliance_deadlines()
+        return super().list(request, *args, **kwargs)
+
+    def retrieve(self, request, *args, **kwargs):
+        check_compliance_deadlines()
+        return super().retrieve(request, *args, **kwargs)
 
 class NotificationViewSet(viewsets.ModelViewSet):
     queryset = Notification.objects.all()
@@ -251,8 +329,8 @@ class ChallengeParticipationViewSet(viewsets.ModelViewSet):
         challenge = participation.challenge
         employee = participation.employee
         profile = employee.esg_profile
+        config = SystemConfig.get_solo()
         
-        # Earn XP
         participation.xp_awarded = challenge.xp
         participation.save()
         
@@ -260,12 +338,12 @@ class ChallengeParticipationViewSet(viewsets.ModelViewSet):
         profile.completed_challenges_count += 1
         profile.save()
         
-        Notification.objects.create(
-            user=employee,
-            message=f"Challenge '{challenge.title}' approved! Earned {challenge.xp} XP."
+        send_notification(
+            employee,
+            f"Challenge '{challenge.title}' approved! Earned {challenge.xp} XP.",
+            config.notify_csr_approval
         )
         
-        # Check badges
         check_badge_unlocks(employee)
 
 class EmployeeProfileViewSet(viewsets.ReadOnlyModelViewSet):
@@ -358,6 +436,7 @@ class ESGSystemViewSet(viewsets.ViewSet):
         
         # Check and flag overdue compliance
         check_compliance_deadlines()
+        check_policy_reminders()
         
         # Fetch organization weights
         weights_config, _ = OrganizationWeightConfig.objects.get_or_create(
@@ -524,26 +603,25 @@ class ESGSystemViewSet(viewsets.ViewSet):
     @action(detail=False, methods=['get'], url_path='dashboard')
     def dashboard(self, request):
         today = timezone.now().date()
-        month_start = today.replace(day=1)
         
-        # Trigger check/recalculate first
-        self.calculate_scores(request)
+        # Lightweight overdue check only — no full score recalculation
+        check_compliance_deadlines()
         
-        # Get overall score
         overall_score = OverallESGScore.objects.order_by('-date').first()
         overall_data = OverallESGScoreSerializer(overall_score).data if overall_score else {
             "environmental_score": 85.0, "social_score": 75.0, "governance_score": 80.0, "total_score": 80.0
         }
         
-        # Get rankings (Department Score sorting)
-        dept_scores = DepartmentScore.objects.filter(date=month_start).order_by('-total_score')
+        latest_score_date = DepartmentScore.objects.order_by('-date').values_list('date', flat=True).first()
+        if latest_score_date:
+            dept_scores = DepartmentScore.objects.filter(date=latest_score_date).order_by('-total_score')
+        else:
+            dept_scores = DepartmentScore.objects.none()
         rankings = DepartmentScoreSerializer(dept_scores, many=True).data
         
-        # Carbon emission trend (past 6 months)
         six_months_ago = today - datetime.timedelta(days=180)
         transactions = CarbonTransaction.objects.filter(date__gte=six_months_ago)
         
-        # Aggregate by month
         trend_data = {}
         for tx in transactions:
             m_key = tx.date.strftime('%Y-%m')
@@ -551,12 +629,12 @@ class ESGSystemViewSet(viewsets.ViewSet):
             
         trend_list = [{"month": k, "emissions": float(v)} for k, v in sorted(trend_data.items())]
         
-        # Leaderboard
         profiles = EmployeeProfile.objects.order_by('-xp')[:5]
         leaderboard = EmployeeProfileSerializer(profiles, many=True).data
         
-        # Compliance notification flags for the common company user
-        user = User.objects.filter(username='employee0').first() or User.objects.filter(is_superuser=False).first() or User.objects.first()
+        user = request.user if request.user.is_authenticated else None
+        if not user:
+            user = User.objects.filter(username='employee0').first() or User.objects.filter(is_superuser=False).first() or User.objects.first()
         notifications = []
         if user:
             notifications = NotificationSerializer(
@@ -571,6 +649,16 @@ class ESGSystemViewSet(viewsets.ViewSet):
             "leaderboard": leaderboard,
             "notifications": notifications
         })
+
+    @action(detail=False, methods=['get', 'patch'], url_path='config')
+    def config(self, request):
+        cfg = SystemConfig.get_solo()
+        if request.method == 'PATCH':
+            serializer = SystemConfigSerializer(cfg, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data)
+        return Response(SystemConfigSerializer(cfg).data)
 
     @action(detail=False, methods=['get'], url_path='export-report')
     def export_report(self, request):
@@ -595,10 +683,9 @@ class ESGSystemViewSet(viewsets.ViewSet):
         
         if module == 'environmental' or not module:
             txs = CarbonTransaction.objects.filter(filters)
-            headers = ['Date', 'Department', 'Record Type', 'Emission Factor', 'Quantity', 'Calculated Emission (kg CO2)']
+            headers = ['Department', 'Record Type', 'Emission Factor', 'Quantity', 'Calculated Emission (kg CO2)']
             for tx in txs:
                 data_rows.append([
-                    tx.date,
                     tx.department.name,
                     tx.record_type,
                     tx.emission_factor.name if tx.emission_factor else 'N/A',
@@ -606,12 +693,10 @@ class ESGSystemViewSet(viewsets.ViewSet):
                     tx.calculated_emission
                 ])
         elif module == 'social':
-            # CSR & Training completions
-            headers = ['Date/Completion', 'Employee', 'Activity/Course', 'Type', 'Points/Hours', 'Status']
-            participations = EmployeeParticipation.objects.all() # can filter if user is related to department
+            headers = ['Employee', 'Activity/Course', 'Type', 'Points/Hours', 'Status']
+            participations = EmployeeParticipation.objects.all()
             for p in participations:
                 data_rows.append([
-                    p.completion_date,
                     p.employee.username,
                     p.csr_activity.title,
                     'CSR Activity',
@@ -621,7 +706,6 @@ class ESGSystemViewSet(viewsets.ViewSet):
             trainings = TrainingCompletion.objects.all()
             for t in trainings:
                 data_rows.append([
-                    t.date_completed,
                     t.employee.username,
                     t.course_name,
                     'Training',
@@ -629,17 +713,29 @@ class ESGSystemViewSet(viewsets.ViewSet):
                     'Completed'
                 ])
         elif module == 'governance':
-            headers = ['Title', 'Audit', 'Severity', 'Owner', 'Due Date', 'Status']
-            issues = ComplianceIssue.objects.all()
-            for i in issues:
-                data_rows.append([
-                    i.title,
-                    i.audit.title if i.audit else 'Independent',
-                    i.severity,
-                    i.owner.username,
-                    i.due_date,
-                    i.status
-                ])
+            if export_format in ['csv', 'excel']:
+                headers = ['Title', 'Audit', 'Severity', 'Owner', 'Status']
+                issues = ComplianceIssue.objects.all()
+                for i in issues:
+                    data_rows.append([
+                        i.title,
+                        i.audit.title if i.audit else 'Independent',
+                        i.severity,
+                        i.owner.username,
+                        i.status
+                    ])
+            else:
+                headers = ['Title', 'Audit', 'Severity', 'Owner', 'Due Date', 'Status']
+                issues = ComplianceIssue.objects.all()
+                for i in issues:
+                    data_rows.append([
+                        i.title,
+                        i.audit.title if i.audit else 'Independent',
+                        i.severity,
+                        i.owner.username,
+                        i.due_date,
+                        i.status
+                    ])
                 
         # Return format check
         if export_format in ['csv', 'excel']:
@@ -656,47 +752,114 @@ class ESGSystemViewSet(viewsets.ViewSet):
             from reportlab.lib import colors
             from reportlab.lib.pagesizes import letter, landscape
             from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
-            from reportlab.lib.styles import getSampleStyleSheet
+            from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+            from reportlab.pdfgen import canvas
             
+            class NumberedCanvas(canvas.Canvas):
+                def __init__(self, *args, **kwargs):
+                    super(NumberedCanvas, self).__init__(*args, **kwargs)
+                    self._saved_page_states = []
+                def showPage(self):
+                    self._saved_page_states.append(dict(self.__dict__))
+                    self._startPage()
+                def save(self):
+                    num_pages = len(self._saved_page_states)
+                    for state in self._saved_page_states:
+                        self.__dict__.update(state)
+                        self.draw_page_number(num_pages)
+                        canvas.Canvas.showPage(self)
+                    canvas.Canvas.save(self)
+                def draw_page_number(self, page_count):
+                    self.saveState()
+                    self.setFont("Helvetica-Bold", 8)
+                    self.setFillColor(colors.HexColor('#64748b'))
+                    # Running Header
+                    self.drawString(54, 560, f"ESG {self.module_title.upper()} REPORT")
+                    self.setStrokeColor(colors.HexColor('#cbd5e1'))
+                    self.setLineWidth(0.75)
+                    self.line(54, 552, 738, 552)
+                    # Running Footer
+                    self.setFont("Helvetica", 8)
+                    self.drawString(54, 30, "Confidential - For Internal Review Only")
+                    self.drawRightString(738, 30, f"Page {self._pageNumber} of {page_count}")
+                    self.line(54, 42, 738, 42)
+                    self.restoreState()
+
             buffer = io.BytesIO()
-            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+            # Set margins to 54pt (0.75 inch)
+            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter), leftMargin=54, rightMargin=54, topMargin=72, bottomMargin=54)
             elements = []
             
             styles = getSampleStyleSheet()
-            title_text = f"ESG {module.capitalize() if module else 'General'} Report"
-            elements.append(Paragraph(title_text, styles['Title']))
-            elements.append(Paragraph(f"Export Date: {timezone.now().date()}", styles['Normal']))
-            elements.append(Spacer(1, 20))
             
-            # Format data for table
-            table_data = [headers]
+            # Custom ParagraphStyles for Table Cells
+            style_cell = ParagraphStyle(
+                'Cell',
+                parent=styles['Normal'],
+                fontName='Helvetica',
+                fontSize=9,
+                leading=11,
+                textColor=colors.HexColor('#1e293b')
+            )
+            style_cell_header = ParagraphStyle(
+                'CellHeader',
+                parent=styles['Normal'],
+                fontName='Helvetica-Bold',
+                fontSize=10,
+                leading=12,
+                textColor=colors.white
+            )
+            style_title = ParagraphStyle(
+                'ReportTitle',
+                parent=styles['Title'],
+                fontName='Helvetica-Bold',
+                fontSize=22,
+                leading=26,
+                textColor=colors.HexColor('#0f172a'),
+                alignment=0
+            )
+            style_meta = ParagraphStyle(
+                'ReportMeta',
+                parent=styles['Normal'],
+                fontName='Helvetica',
+                fontSize=10,
+                leading=14,
+                textColor=colors.HexColor('#475569')
+            )
+            
+            title_text = f"ESG {module.capitalize() if module else 'General'} Report"
+            elements.append(Paragraph(title_text, style_title))
+            elements.append(Paragraph(f"Export Date: {timezone.now().date()}", style_meta))
+            elements.append(Spacer(1, 15))
+            
+            # Format data for table by wrapping in Paragraphs
+            table_data = []
+            table_data.append([Paragraph(h, style_cell_header) for h in headers])
             for row in data_rows:
-                # Convert everything to string to avoid reportlab errors with Decimals/Dates
-                table_data.append([str(col) for col in row])
+                table_data.append([Paragraph(str(col), style_cell) for col in row])
                 
             if len(table_data) > 1:
-                t = Table(table_data)
+                # Printable area width: 792 - 2 * 54 = 684
+                col_width = 684.0 / len(headers)
+                t = Table(table_data, colWidths=[col_width] * len(headers))
                 t.setStyle(TableStyle([
-                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#04AA6D')),
-                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#1e293b')), # Sleek dark slate
                     ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
-                    ('FONTSIZE', (0, 0), (-1, 0), 12),
-                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
-                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f2f2f2')),
-                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
-                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
-                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
-                    ('FONTSIZE', (0, 1), (-1, -1), 10),
-                    ('TOPPADDING', (0, 1), (-1, -1), 6),
+                    ('VALIGN', (0, 0), (-1, -1), 'TOP'),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 8),
+                    ('TOPPADDING', (0, 0), (-1, 0), 8),
+                    ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.HexColor('#f8fafc')]),
                     ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
-                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                    ('TOPPADDING', (0, 1), (-1, -1), 6),
+                    ('LINEBELOW', (0, 0), (-1, -1), 0.5, colors.HexColor('#e2e8f0')),
                 ]))
                 elements.append(t)
             else:
-                elements.append(Paragraph("No data found for the selected criteria.", styles['Normal']))
+                elements.append(Paragraph("No data found for the selected criteria.", style_cell))
                 
-            doc.build(elements)
+            # Bind module name to NumberedCanvas for header print
+            NumberedCanvas.module_title = module if module else 'General'
+            doc.build(elements, canvasmaker=NumberedCanvas)
             
             buffer.seek(0)
             response = HttpResponse(buffer.read(), content_type='application/pdf')
