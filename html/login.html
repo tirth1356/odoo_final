@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ESG CORE | Secure Institutional Access</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800&family=Hanken+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@700&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@100..900&family=Hanken+Grotesk:wght@100..900&family=JetBrains+Mono:wght@100..900&display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary-fixed-dim": "#baccb2",
+                    "on-tertiary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "surface-bright": "#fcf9f8",
+                    "on-primary-fixed": "#111f0f",
+                    "on-error": "#ffffff",
+                    "inverse-on-surface": "#f3f0ef",
+                    "surface-container-low": "#f6f3f2",
+                    "primary-container": "#697963",
+                    "on-primary-container": "#f8fff0",
+                    "primary-fixed": "#d6e8cd",
+                    "on-tertiary-fixed": "#3a0b00",
+                    "secondary-container": "#38fe13",
+                    "tertiary-fixed-dim": "#ffb59e",
+                    "surface-tint": "#53634e",
+                    "surface-container-high": "#eae7e7",
+                    "surface-dim": "#dcd9d9",
+                    "error": "#ba1a1a",
+                    "error-container": "#ffdad6",
+                    "surface-container-highest": "#e5e2e1",
+                    "on-tertiary-fixed-variant": "#852400",
+                    "on-secondary-fixed-variant": "#095300",
+                    "on-surface-variant": "#444841",
+                    "inverse-primary": "#baccb2",
+                    "tertiary": "#aa3000",
+                    "on-primary-fixed-variant": "#3b4b37",
+                    "primary": "#50604b",
+                    "surface-container": "#f0eded",
+                    "on-secondary-container": "#107100",
+                    "on-surface": "#1c1b1b",
+                    "on-tertiary-container": "#fffbff",
+                    "tertiary-container": "#d43f00",
+                    "surface-variant": "#e5e2e1",
+                    "background": "#fcf9f8",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary-fixed": "#022100",
+                    "outline-variant": "#c4c8bf",
+                    "tertiary-fixed": "#ffdbd0",
+                    "surface": "#fcf9f8",
+                    "secondary-fixed": "#79ff5b",
+                    "inverse-surface": "#313030",
+                    "on-secondary": "#ffffff",
+                    "secondary": "#106e00",
+                    "secondary-fixed-dim": "#2ae500",
+                    "outline": "#747871",
+                    "on-error-container": "#93000a",
+                    "on-background": "#1c1b1b"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "margin-mobile": "16px",
+                    "margin-desktop": "40px",
+                    "gutter": "24px",
+                    "shadow-offset": "4px"
+            },
+            "fontFamily": {
+                    "headline-lg-mobile": ["Archivo Narrow"],
+                    "headline-lg": ["Archivo Narrow"],
+                    "display-lg": ["Archivo Narrow"],
+                    "body-md": ["Hanken Grotesk"],
+                    "headline-md": ["Archivo Narrow"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "label-bold": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "label-bold": ["12px", {"lineHeight": "1.4", "fontWeight": "700"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .brutalist-shadow {
+            box-shadow: 8px 8px 0px 0px rgba(28, 27, 27, 1);
+        }
+        .brutalist-shadow-hover:hover {
+            box-shadow: 12px 12px 0px 0px rgba(28, 27, 27, 1);
+            transform: translate(-4px, -4px);
+        }
+        .brutalist-shadow-active:active {
+            box-shadow: 0px 0px 0px 0px rgba(28, 27, 27, 1);
+            transform: translate(4px, 4px);
+        }
+        .text-outline {
+            -webkit-text-stroke: 1px #1c1b1b;
+            color: transparent;
+        }
+        .noise-texture {
+            background-image: url("https://www.transparenttextures.com/patterns/pinstripe-dark.png");
+            opacity: 0.05;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex flex-col selection:bg-secondary-fixed selection:text-on-secondary-fixed">
+<!-- TopAppBar -->
+<header class="w-full top-0 border-b-2 border-on-surface bg-background flex justify-between items-center px-margin-mobile md:px-margin-desktop py-4 z-50">
+<div class="font-headline-lg text-headline-lg-mobile md:text-headline-lg uppercase tracking-tighter text-on-surface">
+            ESG CORE
+        </div>
+<nav class="hidden md:flex gap-gutter">
+<button class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-primary transition-colors">DASHBOARD</button>
+<button class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-primary transition-colors">INTELLIGENCE</button>
+<button class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-primary transition-colors">REPORTS</button>
+</nav>
+<button class="font-label-bold text-label-bold uppercase px-4 py-2 bg-on-surface text-background hover:bg-secondary transition-colors brutalist-shadow-active">
+            SUPPORT
+        </button>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow flex flex-col md:flex-row relative overflow-hidden">
+<!-- Left Side: Atmospheric/Institutional Panel -->
+<section class="hidden md:flex md:w-1/2 bg-primary-container relative flex-col justify-center items-center p-20 overflow-hidden border-r-2 border-on-surface">
+<div class="absolute inset-0 noise-texture pointer-events-none"></div>
+<!-- Abstract Grid & Brand Mark -->
+<div class="relative z-10 w-full max-w-md">
+<div class="border-4 border-on-surface p-12 bg-surface-bright brutalist-shadow">
+<h1 class="font-display-lg text-display-lg uppercase leading-none mb-4">ESG<br/>RESOLVE</h1>
+<div class="h-1 w-24 bg-on-surface mb-8"></div>
+<p class="font-body-lg text-body-lg text-on-surface mb-8">
+                        The definitive operating system for institutional environmental, social, and governance intelligence.
+                    </p>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-4xl text-secondary">verified_user</span>
+<span class="font-label-bold text-label-bold uppercase text-on-surface-variant">Military-Grade Encryption Standard</span>
+</div>
+</div>
+<!-- Decorative Elements -->
+<div class="absolute -top-10 -right-10 w-40 h-40 border-2 border-on-surface/20 flex items-center justify-center -rotate-12">
+<span class="font-headline-lg text-headline-lg-mobile text-on-surface/10 uppercase">AUTHENTICATED</span>
+</div>
+</div>
+<!-- Background Image Integration -->
+<div class="absolute bottom-0 left-0 w-full h-1/2 opacity-20 filter grayscale contrast-150 mix-blend-multiply pointer-events-none" data-alt="A brutalist architectural close-up of heavy concrete pillars and sharp shadows under a high-contrast midday sun. The visual style is cold, institutional, and commanding, featuring a monochromatic palette with subtle olive-green undertones. The lighting is harsh, creating deep black voids and stark white highlights that emphasize structural integrity and security." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCDjhtzwtHhPLaJRfKuMvRIlaAxdtn33uEoW43fCXFDDPRwHH8cZ4QwahG3pcE9teJdo7vgp28kVkfJGhhC3TwhOtAb69yXNtDCEpTFTqMIFhzmXqMBM3vvx5R_o36XefHCSl-Nl8hExgTYKebUNNxpr5WsjxPnde1NYP2ffkSIYXzfFqJNwpHc8zPnr7XIpkeEhWQVG_fWD9Y9TBzgwSHW08GF-Zo_worqclkcaN7Zj_pPyr-WGVFwRg')">
+</div>
+</section>
+<!-- Right Side: Login Form -->
+<section class="w-full md:w-1/2 flex flex-col justify-center items-center p-margin-mobile md:p-margin-desktop bg-surface-container">
+<!-- Mobile Branding Only -->
+<div class="md:hidden mb-12 text-center">
+<h1 class="font-headline-lg text-headline-lg-mobile uppercase mb-2">ESG RESOLVE</h1>
+<p class="font-label-bold text-label-bold uppercase text-primary">Secure Institutional Access</p>
+</div>
+<div class="w-full max-w-md bg-background border-[3px] border-on-surface p-8 brutalist-shadow transition-all duration-300">
+<header class="mb-8 border-b-2 border-on-surface pb-6">
+<h2 class="font-headline-md text-headline-md uppercase mb-1">SIGN IN</h2>
+<p class="font-label-bold text-label-bold text-on-surface-variant">AUTHORIZED PERSONNEL ONLY</p>
+</header>
+<form class="space-y-6" onsubmit="event.preventDefault();">
+<!-- Institutional Email/ID -->
+<div class="space-y-2">
+<label class="block font-label-bold text-label-bold uppercase text-on-surface" for="email">INSTITUTIONAL EMAIL/ID</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant">alternate_email</span>
+<input class="w-full bg-surface-container-low border-2 border-on-surface px-12 py-4 font-body-md focus:outline-none focus:ring-0 focus:border-secondary transition-colors" id="email" name="email" placeholder="ID_REF_XXXXXX" type="text"/>
+</div>
+</div>
+<!-- Access Key/Password -->
+<div class="space-y-2">
+<div class="flex justify-between items-end">
+<label class="block font-label-bold text-label-bold uppercase text-on-surface" for="password">ACCESS KEY/PASSWORD</label>
+</div>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant">lock</span>
+<input class="w-full bg-surface-container-low border-2 border-on-surface px-12 py-4 font-body-md focus:outline-none focus:ring-0 focus:border-secondary transition-colors" id="password" name="password" placeholder="••••••••••••" type="password"/>
+<button class="absolute right-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-on-surface-variant hover:text-on-surface" type="button">visibility</button>
+</div>
+</div>
+<!-- Actions -->
+<div class="pt-4 flex flex-col gap-4">
+<button class="w-full bg-secondary text-on-secondary font-headline-md text-headline-md uppercase py-4 border-2 border-on-surface brutalist-shadow brutalist-shadow-active brutalist-shadow-hover transition-all" type="submit">
+                            SIGN IN
+                        </button>
+<div class="flex flex-col md:flex-row justify-between items-center gap-4 mt-2">
+<a class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors border-b-2 border-transparent hover:border-tertiary" href="#">
+                                FORGOT ACCESS KEY
+                            </a>
+<label class="flex items-center gap-2 cursor-pointer group">
+<input class="w-5 h-5 border-2 border-on-surface bg-surface-container-low checked:bg-secondary appearance-none rounded-none transition-colors" type="checkbox"/>
+<span class="font-label-bold text-label-bold uppercase text-on-surface-variant group-hover:text-on-surface">REMEMBER TERMINAL</span>
+</label>
+</div>
+</div>
+</form>
+<!-- Security Notice -->
+<div class="mt-12 p-4 bg-surface-container-highest border border-on-surface-variant/20 flex gap-4 items-start">
+<span class="material-symbols-outlined text-error mt-1">gpp_maybe</span>
+<p class="font-label-bold text-[10px] leading-tight text-on-surface-variant opacity-80">
+                        BY PROCEEDING, YOU ACKNOWLEDGE THAT SYSTEM ACCESS IS LOGGED AND MONITORED. UNAUTHORIZED ATTEMPTS ARE SUBJECT TO INSTITUTIONAL REVIEW UNDER THE SECURITY PROTOCOL CORE-8.
+                    </p>
+</div>
+</div>
+<!-- Footer for Mobile -->
+<div class="md:hidden mt-8 text-center px-4 opacity-50">
+<p class="font-label-bold text-[10px] uppercase">© 2024 ESG CORE SYSTEMS. ALL RIGHTS RESERVED.</p>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="w-full bg-surface-container-highest border-t-2 border-on-surface px-margin-mobile md:px-margin-desktop py-8 flex flex-col md:flex-row justify-between gap-gutter z-10">
+<div class="flex flex-col gap-2">
+<span class="font-headline-md text-headline-md text-on-surface">ESG CORE SYSTEMS</span>
+<span class="font-label-bold text-label-bold uppercase text-on-surface-variant">© 2024 ESG CORE SYSTEMS. ALL RIGHTS RESERVED.</span>
+</div>
+<div class="flex flex-wrap gap-x-gutter gap-y-4 items-center">
+<a class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors" href="#">PRIVACY POLICY</a>
+<a class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors" href="#">TERMS OF SERVICE</a>
+<a class="font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors" href="#">INSTITUTIONAL SECURITY</a>
+</div>
+</footer>
+<!-- Micro-interaction Scripts -->
+<script>
+        // Form Input Interactions
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                input.parentElement.parentElement.querySelector('label').classList.add('text-secondary');
+            });
+            input.addEventListener('blur', () => {
+                input.parentElement.parentElement.querySelector('label').classList.remove('text-secondary');
+            });
+        });
+
+        // Simple Toggle for Password Visibility
+        const togglePass = document.querySelector('.material-symbols-outlined.hover\\:text-on-surface');
+        if(togglePass) {
+            togglePass.addEventListener('click', function() {
+                const passInput = document.getElementById('password');
+                if(passInput.type === 'password') {
+                    passInput.type = 'text';
+                    this.textContent = 'visibility_off';
+                } else {
+                    passInput.type = 'password';
+                    this.textContent = 'visibility';
+                }
+            });
+        }
+    </script>
+</body></html>

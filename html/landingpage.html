@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>ESG RESOLVE | Institutional-Grade Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800&amp;family=JetBrains+Mono:wght@700&amp;family=Hanken+Grotesk:wght@400;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-secondary-fixed-variant": "#095300",
+                        "inverse-on-surface": "#f3f0ef",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-container": "#107100",
+                        "on-tertiary-fixed-variant": "#852400",
+                        "primary": "#50604b",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "background": "#fcf9f8",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-surface": "#1c1b1b",
+                        "on-tertiary-container": "#fffbff",
+                        "surface-container": "#f0eded",
+                        "on-secondary-fixed": "#022100",
+                        "secondary": "#106e00",
+                        "outline": "#747871",
+                        "on-secondary": "#ffffff",
+                        "tertiary-container": "#d43f00",
+                        "surface-dim": "#dcd9d9",
+                        "on-error-container": "#93000a",
+                        "on-primary-container": "#f8fff0",
+                        "on-background": "#1c1b1b",
+                        "error": "#ba1a1a",
+                        "on-primary-fixed-variant": "#3b4b37",
+                        "inverse-surface": "#313030",
+                        "surface": "#fcf9f8",
+                        "on-tertiary-fixed": "#3a0b00",
+                        "inverse-primary": "#baccb2",
+                        "outline-variant": "#c4c8bf",
+                        "secondary-fixed": "#79ff5b",
+                        "surface-tint": "#53634e",
+                        "tertiary-fixed-dim": "#ffb59e",
+                        "secondary-container": "#38fe13",
+                        "secondary-fixed-dim": "#2ae500",
+                        "primary-fixed": "#d6e8cd",
+                        "tertiary": "#aa3000",
+                        "primary-container": "#697963",
+                        "surface-container-lowest": "#ffffff",
+                        "surface-container-low": "#f6f3f2",
+                        "surface-container-high": "#eae7e7",
+                        "on-primary-fixed": "#111f0f",
+                        "on-surface-variant": "#444841",
+                        "surface-bright": "#fcf9f8",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-fixed-dim": "#baccb2",
+                        "surface-variant": "#e5e2e1",
+                        "on-error": "#ffffff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "gutter": "24px",
+                        "margin-desktop": "40px",
+                        "shadow-offset": "4px",
+                        "margin-mobile": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "label-bold": ["JetBrains Mono"],
+                        "headline-lg": ["Archivo Narrow"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "display-lg": ["Archivo Narrow"],
+                        "headline-md": ["Archivo Narrow"],
+                        "body-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "label-bold": ["12px", {"lineHeight": "1.4", "fontWeight": "700"}],
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "headline-md": ["24px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .brutalist-border { border: 2px solid #1c1b1b; }
+        .brutalist-shadow { shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]; }
+        .brutalist-shadow-hover:hover { transform: translate(-4px, -4px); box-shadow: 8px 8px 0px 0px rgba(0,0,0,1); }
+        .brutalist-shadow-active:active { transform: translate(4px, 4px); box-shadow: 0px 0px 0px 0px rgba(0,0,0,1); }
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-primary-container text-on-primary-container border-b-2 border-on-background h-16 flex justify-between items-center px-margin-mobile md:px-margin-desktop">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-headline-md">grid_view</span>
+<h1 class="text-headline-md font-headline-md font-bold tracking-tighter uppercase">ESG RESOLVE</h1>
+</div>
+<nav class="hidden md:flex gap-8 items-center">
+<a class="font-label-bold text-label-bold uppercase text-on-primary-container/80 hover:text-white transition-colors" href="#">Features</a>
+<a class="font-label-bold text-label-bold uppercase text-on-primary-container/80 hover:text-white transition-colors" href="#">Solutions</a>
+<a class="font-label-bold text-label-bold uppercase text-on-primary-container/80 hover:text-white transition-colors" href="#">About</a>
+<button class="bg-on-background text-background font-label-bold text-label-bold px-6 py-2 border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all uppercase">LOGOUT</button>
+</nav>
+<button class="md:hidden material-symbols-outlined">menu</button>
+</header>
+<main class="pt-16 pb-24">
+<!-- Hero Section -->
+<section class="min-h-[80vh] flex flex-col items-center justify-center text-center px-margin-mobile md:px-margin-desktop py-20 bg-surface">
+<div class="inline-block bg-primary-container text-on-primary-container font-label-bold text-label-bold px-3 py-1 mb-8 border-2 border-on-background uppercase">
+                SYSTEM UPDATE: AI ROADMAP 2.0
+            </div>
+<h2 class="text-display-lg font-display-lg text-on-surface max-w-4xl uppercase leading-tight mb-6">
+                INSTITUTIONAL-GRADE <span class="text-secondary">ESG INTELLIGENCE</span>. ACTIONABLE ANALYTICS. <span class="text-primary">ZERO FLUFF</span>.
+            </h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mb-12">
+                Reject the greenwashing. Harness brutal precision in environmental, social, and governance reporting through our high-fidelity analytics engine.
+            </p>
+<div class="flex flex-col md:flex-row gap-6">
+<button class="bg-secondary text-on-secondary font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase">
+                    START ASSESSMENT
+                </button>
+<button class="bg-white text-on-background font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all uppercase">
+                    VIEW DEMO
+                </button>
+</div>
+</section>
+<!-- Service Highlights (Bento Grid Style) -->
+<section class="px-margin-mobile md:px-margin-desktop py-24 bg-surface-container-low border-y-2 border-on-background">
+<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+<!-- Precision Analytics -->
+<div class="bg-white p-8 border-2 border-on-background shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-6 group hover:-translate-y-1 transition-transform">
+<div class="w-16 h-16 bg-primary-fixed border-2 border-on-background flex items-center justify-center">
+<span class="material-symbols-outlined text-headline-md text-on-primary-fixed">monitoring</span>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md uppercase mb-3">PRECISION ANALYTICS</h3>
+<p class="text-on-surface-variant">Scoring across Environment, Social, and Governance pillars with calculated confidence vectors. Hard data, no compromises.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center">
+<span class="text-label-bold font-label-bold uppercase">View Metrics</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+</div>
+<!-- Strategic Intelligence -->
+<div class="bg-white p-8 border-2 border-on-background shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-6 group hover:-translate-y-1 transition-transform">
+<div class="w-16 h-16 bg-secondary-container border-2 border-on-background flex items-center justify-center">
+<span class="material-symbols-outlined text-headline-md text-on-secondary-container">lightbulb</span>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md uppercase mb-3">STRATEGIC INTELLIGENCE</h3>
+<p class="text-on-surface-variant">Prioritized recommendations tailored specifically to your operational footprint and industry sector. Move from theory to execution.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center">
+<span class="text-label-bold font-label-bold uppercase">Analyze Strategy</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+</div>
+<!-- AI Orchestration -->
+<div class="bg-white p-8 border-2 border-on-background shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] flex flex-col gap-6 group hover:-translate-y-1 transition-transform">
+<div class="w-16 h-16 bg-tertiary-fixed border-2 border-on-background flex items-center justify-center">
+<span class="material-symbols-outlined text-headline-md text-on-tertiary-fixed">smart_toy</span>
+</div>
+<div>
+<h3 class="text-headline-md font-headline-md uppercase mb-3">AI ORCHESTRATION</h3>
+<p class="text-on-surface-variant">Deploy a step-by-step execution plan managed by our intelligent compliance neural network. Automated reporting at scale.</p>
+</div>
+<div class="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center">
+<span class="text-label-bold font-label-bold uppercase">Learn More</span>
+<span class="material-symbols-outlined">arrow_forward</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Data Intake Section (Assessment Preview) -->
+<section class="px-margin-mobile md:px-margin-desktop py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+<div class="space-y-8">
+<h2 class="text-headline-lg font-headline-lg uppercase border-l-8 border-secondary pl-6">THE ASSESSMENT INTERFACE</h2>
+<p class="text-body-lg font-body-lg text-on-surface-variant">
+                    Our multi-step intake engine is designed for rapid institutional deployment. Capture complex ESG datasets through a streamlined, secure interface that validates every entry against global standards in real-time.
+                </p>
+<div class="space-y-4">
+<div class="flex items-start gap-4 p-4 bg-surface-container border-2 border-on-background">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<div>
+<p class="font-label-bold text-label-bold uppercase">Dynamic Form Logic</p>
+<p class="text-on-surface-variant">Questions adapt based on your industry and jurisdiction.</p>
+</div>
+</div>
+<div class="flex items-start gap-4 p-4 bg-surface-container border-2 border-on-background">
+<span class="material-symbols-outlined text-secondary">check_circle</span>
+<div>
+<p class="font-label-bold text-label-bold uppercase">Auto-Validation</p>
+<p class="text-on-surface-variant">Built-in error checking prevents non-compliant data entry.</p>
+</div>
+</div>
+</div>
+<button class="bg-on-background text-white font-label-bold text-label-bold px-8 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase">
+                    Explore Interface
+                </button>
+</div>
+<div class="relative group">
+<div class="absolute -inset-2 bg-secondary/20 border-2 border-secondary z-0 translate-x-4 translate-y-4"></div>
+<div class="relative z-10 border-2 border-on-background shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] bg-white overflow-hidden">
+<img alt="A sleek, professional dashboard interface for an ESG assessment tool. The UI features a clean, high-contrast layout with a sidebar for navigation and a main content area showing a multi-step form with input fields, progress indicators, and data visualization charts. The color scheme is dominated by muted olives, deep greens, and crisp whites, maintaining a serious, institutional aesthetic with sharp borders and no-blur shadows." class="w-full h-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAmYCdCq5xc_B2aXR3K1LZqP-rPadMwHC0fM96QF1i6XZ3yWqDDlADmTn3XFE9H4TakNHvEeCEXEVUT41EybLWw0v1leot82WKiJzzXiPqGc9S1QOw5NdGVXLlmmxuAvHeO0D4Z3k0Pkuosopn9bAdarPBLqfteNY06qEs6EeqBcxqBgF-2U3dXlVyCQeMtf7C9X9Vv1qzBxVZ-jjOARvndWUhyxo-Qsioz0nOah8AD1I6WL321XcydXTxhWxBGsCkmAWY"/>
+</div>
+</div>
+</section>
+<!-- Data Table / Metrics Preview -->
+<section class="px-margin-mobile md:px-margin-desktop py-24 bg-surface">
+<div class="border-2 border-on-background bg-white shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
+<div class="bg-primary-container text-on-primary-container p-6 border-b-2 border-on-background flex justify-between items-center">
+<h3 class="text-headline-md font-headline-md uppercase">QUARTERLY ESG BENCHMARKS</h3>
+<span class="font-label-bold text-label-bold uppercase">Sector: Heavy Industry</span>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left font-body-md">
+<thead>
+<tr class="bg-surface-container-high border-b-2 border-on-background">
+<th class="p-4 font-label-bold uppercase border-r-2 border-on-background">Indicator</th>
+<th class="p-4 font-label-bold uppercase border-r-2 border-on-background text-center">Baseline</th>
+<th class="p-4 font-label-bold uppercase border-r-2 border-on-background text-center">Target</th>
+<th class="p-4 font-label-bold uppercase text-center">Status</th>
+</tr>
+</thead>
+<tbody class="font-label-bold">
+<tr class="border-b-2 border-on-background hover:bg-surface-container-low transition-colors">
+<td class="p-4 border-r-2 border-on-background">Carbon Intensity (tCO2e/$M)</td>
+<td class="p-4 border-r-2 border-on-background text-center">450.2</td>
+<td class="p-4 border-r-2 border-on-background text-center">380.0</td>
+<td class="p-4 text-center"><span class="bg-error-container text-on-error-container px-2 py-1 border border-on-background text-[10px]">CRITICAL</span></td>
+</tr>
+<tr class="border-b-2 border-on-background hover:bg-surface-container-low transition-colors">
+<td class="p-4 border-r-2 border-on-background">Board Diversity (%)</td>
+<td class="p-4 border-r-2 border-on-background text-center">18.5</td>
+<td class="p-4 border-r-2 border-on-background text-center">30.0</td>
+<td class="p-4 text-center"><span class="bg-secondary-container text-on-secondary-container px-2 py-1 border border-on-background text-[10px]">ON TRACK</span></td>
+</tr>
+<tr class="border-b-2 border-on-background hover:bg-surface-container-low transition-colors">
+<td class="p-4 border-r-2 border-on-background">Supply Chain Transparency</td>
+<td class="p-4 border-r-2 border-on-background text-center">45.0</td>
+<td class="p-4 border-r-2 border-on-background text-center">85.0</td>
+<td class="p-4 text-center"><span class="bg-tertiary-fixed text-on-tertiary-fixed-variant px-2 py-1 border border-on-background text-[10px]">IMPROVING</span></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="p-4 bg-surface-container-lowest text-right italic text-on-surface-variant text-[12px]">
+                    * Data updated 14-OCT-2023. Source: Global Intelligence Node 4.
+                </div>
+</div>
+</section>
+</main>
+<!-- Footer -->
+<footer class="bg-on-background text-white pt-20 pb-24 border-t-4 border-secondary px-margin-mobile md:px-margin-desktop">
+<div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+<div class="space-y-6">
+<h4 class="text-headline-md font-headline-md uppercase tracking-tighter">ESG RESOLVE</h4>
+<p class="text-on-surface-variant/80 max-w-xs">High-authority ESG compliance systems for the next decade of institutional responsibility.</p>
+<div class="flex gap-4">
+<div class="w-10 h-10 border border-white/20 flex items-center justify-center hover:bg-secondary hover:border-secondary transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">terminal</span>
+</div>
+<div class="w-10 h-10 border border-white/20 flex items-center justify-center hover:bg-secondary hover:border-secondary transition-all cursor-pointer">
+<span class="material-symbols-outlined text-sm">share</span>
+</div>
+</div>
+</div>
+<div>
+<h5 class="font-label-bold text-label-bold uppercase mb-6 text-secondary">Solutions</h5>
+<ul class="space-y-3 font-body-md text-on-surface-variant/80">
+<li><a class="hover:text-white transition-colors" href="#">Risk Assessment</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Regulatory Filing</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Impact Modeling</a></li>
+<li><a class="hover:text-white transition-colors" href="#">AI Orchestrator</a></li>
+</ul>
+</div>
+<div>
+<h5 class="font-label-bold text-label-bold uppercase mb-6 text-secondary">Company</h5>
+<ul class="space-y-3 font-body-md text-on-surface-variant/80">
+<li><a class="hover:text-white transition-colors" href="#">Architecture</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Institutional Labs</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Ethics Board</a></li>
+<li><a class="hover:text-white transition-colors" href="#">Privacy Policy</a></li>
+</ul>
+</div>
+<div class="space-y-6">
+<h5 class="font-label-bold text-label-bold uppercase text-secondary">Subscribe to Intelligence</h5>
+<div class="relative">
+<input class="w-full bg-transparent border-b-2 border-white/20 p-2 focus:border-secondary focus:ring-0 text-white font-label-bold placeholder:text-white/20" placeholder="EMAIL@DOMAIN.COM" type="email"/>
+<button class="absolute right-0 bottom-2 material-symbols-outlined text-secondary">arrow_forward</button>
+</div>
+</div>
+</div>
+<div class="flex flex-col md:flex-row justify-between items-center pt-8 border-t border-white/10 gap-4">
+<span class="font-label-bold text-[10px] uppercase opacity-50">© 2023 ESG RESOLVE SYSTEMS. ALL RIGHTS RESERVED.</span>
+<span class="font-label-bold text-[10px] uppercase opacity-50">ESTABLISHED IN LISBON • SERVING GLOBAL INSTITUTIONS</span>
+</div>
+</footer>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface border-t-2 border-on-background">
+<div class="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg p-1 scale-95 transition-all">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-label-bold font-label-bold">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-1">
+<span class="material-symbols-outlined">menu_open</span>
+<span class="text-label-bold font-label-bold">Modules</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-1">
+<span class="material-symbols-outlined">military_tech</span>
+<span class="text-label-bold font-label-bold">Gaming</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant p-1">
+<span class="material-symbols-outlined">description</span>
+<span class="text-label-bold font-label-bold">Reports</span>
+</div>
+</nav>
+<script>
+        // Micro-interactions for buttons
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'translate(2px, 2px)';
+                btn.style.boxShadow = '0px 0px 0px 0px rgba(0,0,0,1)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = '';
+                btn.style.boxShadow = '';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = '';
+                btn.style.boxShadow = '';
+            });
+        });
+
+        // Navigation Highlight Simulation
+        const navLinks = document.querySelectorAll('header nav a');
+        navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                navLinks.forEach(l => l.classList.remove('text-white', 'font-bold'));
+                link.classList.add('text-white', 'font-bold');
+            });
+        });
+    </script>
+</body></html>
