@@ -23,6 +23,9 @@ class Command(BaseCommand):
         # Users & profiles (delete profiles dynamically since cascading)
         User.objects.exclude(is_superuser=True).delete()
         Department.objects.all().delete()
+        # Delete anything that PROTECTs Category before deleting Category itself
+        CSRActivity.objects.all().delete()
+        Challenge.objects.all().delete()
         Category.objects.all().delete()
         EmissionFactor.objects.all().delete()
         ProductESGProfile.objects.all().delete()
@@ -31,7 +34,6 @@ class Command(BaseCommand):
         Badge.objects.all().delete()
         Reward.objects.all().delete()
         Audit.objects.all().delete()
-        Challenge.objects.all().delete()
         Notification.objects.all().delete()
         OrganizationWeightConfig.objects.all().delete()
         DepartmentScore.objects.all().delete()

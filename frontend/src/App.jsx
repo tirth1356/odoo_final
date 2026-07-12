@@ -332,53 +332,26 @@ function MainApp() {
           <div className="space-y-2 flex-grow">
             {currentPage === 'governance' ? (
               <>
-                <div className="text-[10px] font-label-bold uppercase px-2 text-on-surface-variant opacity-60 mb-2">
-                  Institutional ESG
+                <div className="text-label-bold uppercase px-2 text-on-surface-variant opacity-60 mb-2">
+                  {activeModule.title}
                 </div>
-                <button
-                  onClick={() => {
-                    setCurrentPage('environmental');
-                    setCurrentSubPage('overview');
-                  }}
-                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
-                >
-                  <span className="material-symbols-outlined">eco</span>
-                  <span>Environmental</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setCurrentPage('social');
-                    setCurrentSubPage('overview');
-                  }}
-                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
-                >
-                  <span className="material-symbols-outlined">groups</span>
-                  <span>Social</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setCurrentPage('governance');
-                    setCurrentSubPage('overview');
-                  }}
-                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left active-sidebar-btn bg-secondary-container text-on-secondary-container"
-                >
-                  <span className="material-symbols-outlined">gavel</span>
-                  <span>Governance</span>
-                </button>
-                <button
-                  onClick={() => showToast('Departments Overview - Simulating Data View', 'info')}
-                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
-                >
-                  <span className="material-symbols-outlined">corporate_fare</span>
-                  <span>Departments</span>
-                </button>
-                <button
-                  onClick={() => showToast('Employees Directory - Simulating Data View', 'info')}
-                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
-                >
-                  <span className="material-symbols-outlined">badge</span>
-                  <span>Employees</span>
-                </button>
+                {activeModule.items.map(item => {
+                  const isActive = currentSubPage === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setCurrentSubPage(item.id)}
+                      className={`flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left ${
+                        isActive 
+                          ? 'active-sidebar-btn bg-secondary-container text-on-secondary-container' 
+                          : 'text-on-surface-variant hover:bg-primary-fixed'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
               </>
             ) : (
               <>
@@ -450,7 +423,7 @@ function MainApp() {
           {currentPage === 'dashboard' && <Dashboard subPage={currentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
           {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} autoEmission={autoEmission} />}
           {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} evidenceReq={evidenceReq} badgeAuto={badgeAuto} notifSettings={notifSettings} />}
-          {currentPage === 'governance' && <Governance subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
+          {currentPage === 'governance' && <Governance subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} onExport={triggerExport} />}
 
           {currentPage === 'gaming' && (
             <Gamification 

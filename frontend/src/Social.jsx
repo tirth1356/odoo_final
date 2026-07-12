@@ -10,7 +10,10 @@ export default function Social({ subPage, setSubPage, onNavigate, showToast }) {
   const [participations, setParticipations] = useState([]);
   const [diversity, setDiversity] = useState([]);
   const [trainings, setTrainings] = useState([]);
-  const [approvalQueue, setApprovalQueue] = useState([]);
+  const [approvalQueue, setApprovalQueue] = useState([
+    { id: 1, employee: "Arjun Mehta", avatar: "https://i.pravatar.cc/150?img=1", activity: "Tree Plantation", proof: "plantation_photo.jpg", points: 50 },
+    { id: 2, employee: "Sarah Chen", avatar: "https://i.pravatar.cc/150?img=2", activity: "Blood Donation", proof: "donation_receipt.pdf", points: 100 },
+  ]);
   
   // Use fallbacks for UI lists that aren't populated from DB yet
   const [csrCards] = useState([
@@ -66,7 +69,12 @@ export default function Social({ subPage, setSubPage, onNavigate, showToast }) {
         fetchSocialData();
         setCsrForm({ csr_activity: '1', proof_description: '', proof_file_url: 'http://uploads/csr.jpg' });
       } else {
-        if (showToast) showToast("Error submitting proof.", "error");
+        let errMsg = "Error submitting proof.";
+        try {
+          const errData = await res.json();
+          errMsg = errData.detail || errData.message || errMsg;
+        } catch (_) {}
+        if (showToast) showToast(errMsg, "error");
       }
     } catch (err) {
       if (showToast) showToast("Network error submitting proof.", "error");

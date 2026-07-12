@@ -31,13 +31,11 @@ const DEPARTMENT_OPTIONS = ["Finance", "Corporate", "Procurement", "Manufacturin
 function NewAuditModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState({ title: '', department: '', auditor: '', dueDate: '', scope: 'Internal', priority: 'Standard' });
   const [errors, setErrors] = useState({});
-  const firstInputRef = useRef(null);
 
   useEffect(() => {
     if (isOpen) {
       setForm({ title: '', department: '', auditor: '', dueDate: '', scope: 'Internal', priority: 'Standard' });
       setErrors({});
-      setTimeout(() => firstInputRef.current?.focus(), 60);
     }
   }, [isOpen]);
 
@@ -84,7 +82,7 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
   );
 
   const inputClass = (name) =>
-    `w-full h-11 px-4 border-2 ${errors[name] ? 'border-error' : 'border-on-surface'} bg-surface-container-lowest text-sm text-on-surface focus:outline-none focus:border-secondary transition-colors placeholder:text-on-surface-variant placeholder:text-[11px] placeholder:uppercase`;
+    `w-full h-11 px-4 border-2 ${errors[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm text-black focus:outline-none focus:border-secondary transition-colors placeholder:text-gray-500 placeholder:text-[11px] placeholder:uppercase`;
 
   return (
     <div
@@ -96,7 +94,7 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
       aria-labelledby="new-audit-title"
     >
       <div
-        className="relative w-full max-w-xl bg-surface border-4 border-on-surface flex flex-col"
+        className="relative w-full max-w-xl bg-white border-4 border-on-surface flex flex-col"
         style={{ boxShadow: '12px 12px 0px 0px rgba(28,27,27,1)', maxHeight: '90vh' }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -131,13 +129,12 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
         </div>
 
         {/* ── BODY ─────────────────────────────────── */}
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto">
-          <div className="px-7 py-6 space-y-5">
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7">
+          <div className="space-y-5">
 
             {/* Audit Title */}
             <Field name="title" label="Audit Title *">
               <input
-                ref={firstInputRef}
                 type="text"
                 value={form.title}
                 onChange={(e) => update('title', e.target.value)}
@@ -203,9 +200,9 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
                 {['Standard', 'High', 'Critical'].map((level) => {
                   const active = form.priority === level;
                   const colourMap = {
-                    Standard: active ? 'bg-secondary-container text-on-secondary-container' : 'bg-surface',
-                    High:     active ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-surface',
-                    Critical: active ? 'bg-error-container text-error' : 'bg-surface',
+                    Standard: active ? 'bg-secondary-container text-on-secondary-container' : 'bg-white',
+                    High:     active ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-white',
+                    Critical: active ? 'bg-error-container text-error' : 'bg-white',
                   };
                   return (
                     <button
@@ -235,7 +232,7 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
           </div>
 
           {/* ── FOOTER ──────────────────────────────── */}
-          <div className="px-7 py-5 border-t-2 border-on-surface bg-surface-container-low flex items-center justify-between shrink-0">
+          <div className="mt-6 flex items-center justify-between">
             <button
               type="button"
               onClick={onClose}
@@ -253,22 +250,6 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
                 color: '#022100',
                 boxShadow: '5px 5px 0px 0px rgba(28,27,27,1)',
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.transform = 'translate(-2px,-2px)';
-                e.currentTarget.style.boxShadow = '7px 7px 0px 0px rgba(28,27,27,1)';
-              }}
-              onMouseLeave={e => {
-                e.currentTarget.style.transform = '';
-                e.currentTarget.style.boxShadow = '5px 5px 0px 0px rgba(28,27,27,1)';
-              }}
-              onMouseDown={e => {
-                e.currentTarget.style.transform = 'translate(3px,3px)';
-                e.currentTarget.style.boxShadow = 'none';
-              }}
-              onMouseUp={e => {
-                e.currentTarget.style.transform = 'translate(-2px,-2px)';
-                e.currentTarget.style.boxShadow = '7px 7px 0px 0px rgba(28,27,27,1)';
-              }}
             >
               <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>add_task</span>
               SCHEDULE AUDIT
@@ -283,7 +264,9 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
 /* ─────────────────────────────────────────────
    Main Governance Component
 ───────────────────────────────────────────── */
-export default function Governance({ subPage, setSubPage, onNavigate, showToast }) {
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
+
+export default function Governance({ subPage, setSubPage, onNavigate, showToast, onExport }) {
   const [audits, setAudits] = useState(MOCK_AUDITS);
   const [complianceTrack] = useState(MOCK_COMPLIANCE_TRACK);
   const [newAuditOpen, setNewAuditOpen] = useState(false);
@@ -308,9 +291,29 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast 
 
   const handleDownload = (policyTitle) => safeToast(`Downloading latest PDF: ${policyTitle}`, 'info');
   const handleHistory  = (policyTitle) => safeToast(`Loading changelog for: ${policyTitle}`, 'info');
-  const handleSendReminders = () => safeToast('Compliance reminders dispatched to Logistics and Admin.', 'success');
+  const handleSendReminders = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/governance/send-reminders`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (res.ok) {
+        safeToast('Compliance reminders dispatched successfully!', 'success');
+      } else {
+        safeToast('Failed to send reminders.', 'error');
+      }
+    } catch (e) {
+      safeToast('Failed to send reminders (network error).', 'error');
+    }
+  };
   const handlePrepareDocs = (auditTitle) => safeToast(`Preparing compliance dossier for: ${auditTitle}`, 'info');
-  const handleExport = () => safeToast('Exporting governance data sheets…', 'info');
+  const handleExport = () => {
+    if (onExport) {
+      onExport();
+    } else {
+      safeToast('Exporting governance data sheets…', 'info');
+    }
+  };
 
   return (
     <>
