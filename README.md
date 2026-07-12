@@ -1,98 +1,229 @@
-# ESG Intelligence Platform
+# 🌱 EcoSphere – ESG Intelligence Platform
 
-A full-stack ESG (Environmental, Social, Governance) management platform for tracking corporate sustainability metrics, CSR activities, compliance audits, and employee engagement through gamification.
+A full-stack **Environmental, Social, and Governance (ESG)** management platform that integrates sustainability into everyday business operations. EcoSphere enables organizations to measure environmental impact, improve employee engagement, monitor governance compliance, and generate comprehensive ESG reports from a unified dashboard.
 
-Built with a **Django REST Framework** backend and a **React + Vite** frontend, styled in a neo-brutalist design system.
+---
 
-## Features
+## 🚀 Tech Stack
 
-- **Dashboard** — Company-wide ESG score overview, department rankings, and emissions trend.
-- **Environmental** — Emission tracking across purchases, manufacturing, expenses, and fleet records; environmental goals.
-- **Social** — CSR activities, employee participation with proof-of-evidence approval workflow, diversity metrics, training completion.
-- **Governance** — Policy management, scheduled audits, compliance issue tracking with automatic overdue detection.
-- **Gamification** — XP/points system, challenges, badge unlocks, company leaderboard, and a rewards redemption shop.
-- **Reports** — CSV/Excel export of ESG data by module and department.
-- **Auth** — JWT-based login/registration.
+### Backend
 
-## Tech Stack
+* Django 5
+* Django REST Framework
+* PostgreSQL
+* SimpleJWT
+* ReportLab
+* OpenPyXL
 
-**Backend**
-- Django 5 + Django REST Framework
-- SimpleJWT for authentication
-- PostgreSQL (via `dj-database-url`)
-- ReportLab for report generation
+### Frontend
 
-**Frontend**
-- React 19 + Vite
-- Tailwind CSS 4
-- Axios
-- React Router
+* React 19
+* Vite
+* Tailwind CSS 4
+* React Router
+* Axios
 
-## Project Structure
+---
 
+## ✨ Features
+
+### 🌍 Environmental
+
+* Carbon emission tracking
+* Emission factor management
+* Automatic emission calculations
+* Sustainability goals
+* Department-wise environmental analytics
+* Product ESG profiles
+
+### 🤝 Social
+
+* CSR activity management
+* Employee participation tracking
+* Proof-based approval workflow
+* Diversity metrics
+* Training completion tracking
+
+### 🏛 Governance
+
+* ESG policy management
+* Policy acknowledgements
+* Audit management
+* Compliance issue tracking
+* Overdue compliance detection
+
+### 🏆 Gamification
+
+* Sustainability challenges
+* XP & points system
+* Badge auto-unlock
+* Reward redemption
+* Department & employee leaderboards
+
+### 📊 Reports
+
+* Environmental Report
+* Social Report
+* Governance Report
+* ESG Summary Report
+* Custom Report Builder
+* Export to **PDF**, **Excel**, and **CSV**
+
+---
+
+## ⚙️ Core Business Workflow
+
+```text
+Master Data
+│
+├── Departments
+├── Categories
+├── Emission Factors
+├── Products
+├── ESG Goals
+├── Policies
+└── Challenges
+        │
+        ▼
+ERP Operations
+(Purchases • Manufacturing • Fleet • Expenses)
+        │
+        ▼
+Carbon Transactions
+Employee Participation
+Policy Acknowledgements
+Audits
+Compliance Issues
+        │
+        ▼
+Environmental Score
+Social Score
+Governance Score
+        │
+        ▼
+Department ESG Score
+        │
+        ▼
+Organization ESG Dashboard & Reports
 ```
+
+---
+
+## 📁 Project Structure
+
+```text
 odoo_final/
 ├── backend/
-│   ├── config/            # Django project settings & root URLs
-│   ├── esg_api/            # Main app: models, views, serializers, urls
-│   │   └── management/commands/seed_esg.py   # Demo data seeder
+│   ├── config/
+│   ├── esg_api/
+│   │   ├── management/
+│   │   │   └── commands/
+│   │   │       └── seed_esg.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── urls.py
+│   │   └── views.py
 │   └── manage.py
+│
 └── frontend/
     └── src/
-        ├── App.jsx          # Shell, navigation, global data fetching
-        ├── Dashboard.jsx
-        ├── Environmental.jsx
-        ├── Social.jsx
-        ├── Governance.jsx
-        ├── Gamification.jsx
-        ├── Settings.jsx
-        └── components/      # LandingPage, LoginPage, SignupPage, BrutalistModal
+        ├── components/
+        ├── pages/
+        ├── services/
+        ├── App.jsx
+        └── main.jsx
 ```
 
-## Getting Started
+---
+
+## 🛠 Getting Started
+
+### Clone the repository
+
+```bash
+git clone <repository-url>
+cd odoo_final
+```
 
 ### Backend
 
 ```bash
 cd backend
+
 pip install -r requirements.txt
-```
 
-Configure a `DATABASE_URL` environment variable (PostgreSQL) or rely on the default configured in `config/settings.py`.
-
-```bash
 python manage.py migrate
-python manage.py seed_esg   # populates demo departments, users, policies, badges, rewards, etc.
+python manage.py seed_esg
 python manage.py runserver
 ```
 
-The API is served at `http://localhost:8000/api/`.
+Backend runs at:
+
+```text
+http://localhost:8000/api/
+```
 
 ### Frontend
 
 ```bash
 cd frontend
+
 npm install
 npm run dev
 ```
 
-The app runs at `http://localhost:5173` and expects the API at `http://localhost:8000/api` by default (override with `VITE_API_URL`).
+Frontend runs at:
 
-## API Overview
+```text
+http://localhost:5173
+```
 
-All endpoints are under `/api/`. Auth uses JWT (`/auth/login/`, `/auth/refresh/`, `/auth/register/`); most viewsets currently allow unauthenticated access for demo purposes but accept a Bearer token when available.
+---
 
-| Domain | Endpoints |
-|---|---|
-| Org | `departments/`, `categories/`, `emission-factors/` |
-| Environmental | `purchases/`, `manufacturing/`, `expenses/`, `fleet/`, `carbon-transactions/`, `environmental-scores/`, `environmental-goals/`, `product-esg/` |
-| Social | `csr-activities/`, `participations/`, `diversity/`, `trainings/` |
-| Governance | `policies/`, `audits/`, `compliance-issues/`, `acknowledgements/`, `notifications/` |
-| Gamification | `challenges/`, `challenge-participations/`, `employee-profiles/`, `badges/`, `badge-awards/`, `rewards/`, `reward-redemptions/` |
-| Scoring | `department-scores/`, `weight-config/`, `overall-scores/`, `system/dashboard/`, `system/calculate-scores/`, `system/export-report/`, `system/config/` |
+## 🔗 API Modules
 
-## Demo Data
+| Module        | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| Organization  | Departments, Categories                                      |
+| Environmental | Emission Factors, Carbon Transactions, Goals, Product ESG    |
+| Social        | CSR Activities, Employee Participation, Diversity, Training  |
+| Governance    | Policies, Audits, Compliance Issues, Policy Acknowledgements |
+| Gamification  | Challenges, Badges, Rewards, Leaderboards                    |
+| Reports       | ESG Reports & Custom Report Builder                          |
+| System        | Dashboard, ESG Score Calculation, Settings, Notifications    |
 
-`python manage.py seed_esg` resets and repopulates the database with a consistent demo dataset (departments, users, policies, badges, rewards, challenges, audits, compliance issues) so that all users see the same data. Run it any time the dataset needs to be reset to a known baseline.
+---
 
-⚠️ This command deletes existing non-superuser data before reseeding — do not run it against data you want to keep.
+## 🎯 Highlights
+
+* ESG score calculation engine
+* Configurable environmental, social, and governance weights
+* Automated carbon emission calculations
+* Configurable notification system
+* Badge auto-awarding
+* Reward redemption workflow
+* Role-based JWT authentication
+* Demo data seeding
+* Responsive user interface
+
+---
+
+## 🌟 Bonus Features
+
+* Department ESG rankings
+* Interactive dashboards
+* Mobile-responsive interface
+* Custom report builder
+* PDF, Excel, and CSV exports
+
+---
+
+## 🌱 Demo Data
+
+Populate the application with sample departments, employees, ESG policies, challenges, badges, rewards, audits, compliance issues, and other demo data using:
+
+```bash
+python manage.py seed_esg
+```
+
+> **Note:** Running the seeder resets the existing demo data.

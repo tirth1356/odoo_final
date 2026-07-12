@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
@@ -24,6 +24,19 @@ const ISSUE_STATUS_CLASSES = {
 
 const DEPARTMENT_OPTIONS = ["Finance", "Corporate", "Procurement", "Manufacturing", "Logistics", "Operations", "HR", "Legal", "IT"];
 
+const Field = ({ name, label, errors, children }) => (
+  <div className="space-y-1.5">
+    <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+      {label}
+      {errors?.[name] && <span className="ml-2 text-error normal-case tracking-normal">— {errors[name]}</span>}
+    </label>
+    {children}
+  </div>
+);
+
+const inputClass = (name, errors) =>
+  `w-full h-11 px-4 border-2 ${errors?.[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm text-black focus:outline-none focus:border-secondary transition-colors placeholder:text-gray-500 placeholder:text-[11px] placeholder:uppercase`;
+
 function NewAuditModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState({ title: '', department: '', auditor: '', dueDate: '', scope: 'Internal', priority: 'Standard' });
   const [errors, setErrors] = useState({});
@@ -40,7 +53,10 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
 
   if (!isOpen) return null;
 
-  const update = (field, value) => { setForm(prev => ({ ...prev, [field]: value })); if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' })); };
+  const update = (field, value) => {
+    setForm(prev => ({ ...prev, [field]: value }));
+    if (errors[field]) setErrors(prev => ({ ...prev, [field]: '' }));
+  };
 
   const validate = () => {
     const e = {};
@@ -54,57 +70,95 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
 
   const handleSubmit = (e) => { e.preventDefault(); if (!validate()) return; onSubmit(form); onClose(); };
 
-  const inputClass = (name) => `w-full h-11 px-4 border-2 ${errors[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm focus:outline-none focus:border-secondary transition-colors`;
-
-  const Field = ({ name, label, children }) => (
-    <div className="space-y-1.5">
-      <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
-        {label}{errors[name] && <span className="ml-2 text-error normal-case">— {errors[name]}</span>}
-      </label>
-      {children}
-    </div>
-  );
-
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4" style={{ backgroundColor: 'rgba(28,27,27,0.80)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }} role="dialog" aria-modal="true">
-      <div className="relative w-full max-w-xl bg-white border-4 border-on-surface flex flex-col" style={{ boxShadow: '12px 12px 0px 0px rgba(28,27,27,1)', maxHeight: '90vh' }} onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(28,27,27,0.80)' }}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+      role="dialog" aria-modal="true">
+      <div className="relative w-full max-w-xl bg-white border-4 border-on-surface flex flex-col"
+        style={{ boxShadow: '12px 12px 0px 0px rgba(28,27,27,1)', maxHeight: '90vh' }}
+        onClick={(e) => e.stopPropagation()}>
+
         <div className="flex items-center justify-between px-7 py-5 border-b-2 border-on-surface bg-on-surface shrink-0">
-          <h3 className="uppercase text-surface tracking-tighter" style={{ fontSize: '20px', fontWeight: 700 }}>Schedule New Audit</h3>
-          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center border-2 border-surface hover:bg-surface/10"><span className="material-symbols-outlined text-surface" style={{ fontSize: '18px' }}>close</span></button>
-        </div>
-        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7 space-y-5">
-          <Field name="title" label="Audit Title *"><input type="text" value={form.title} onChange={(e) => update('title', e.target.value)} placeholder="e.g. Annual ESG Compliance Review" className={inputClass('title')} /></Field>
-          <div className="grid grid-cols-2 gap-4">
-            <Field name="department" label="Department *">
-              <select value={form.department} onChange={(e) => update('department', e.target.value)} className={`${inputClass('department')} cursor-pointer`}>
-                <option value="">Select...</option>
-                {DEPARTMENT_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
-              </select>
-            </Field>
-            <Field name="auditor" label="Auditor *"><input type="text" value={form.auditor} onChange={(e) => update('auditor', e.target.value)} placeholder="e.g. S. Nair" className={inputClass('auditor')} /></Field>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <Field name="dueDate" label="Due Date *"><input type="date" value={form.dueDate} onChange={(e) => update('dueDate', e.target.value)} className={inputClass('dueDate')} /></Field>
-            <Field name="scope" label="Scope">
-              <select value={form.scope} onChange={(e) => update('scope', e.target.value)} className={`${inputClass('scope')} cursor-pointer`}>
-                {['Internal', 'External', 'Third-Party', 'Regulatory'].map(s => <option key={s} value={s}>{s}</option>)}
-              </select>
-            </Field>
-          </div>
-          <Field name="priority" label="Priority">
-            <div className="flex gap-3 pt-1">
-              {['Standard', 'High', 'Critical'].map((level) => {
-                const active = form.priority === level;
-                const colourMap = { Standard: active ? 'bg-secondary-container text-on-secondary-container' : 'bg-white', High: active ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-white', Critical: active ? 'bg-error-container text-error' : 'bg-white' };
-                return <button key={level} type="button" onClick={() => update('priority', level)} className={`flex-1 py-2.5 text-[10px] font-bold uppercase border-2 border-on-surface transition-all ${colourMap[level]}`} style={{ boxShadow: active ? '3px 3px 0px 0px rgba(28,27,27,1)' : 'none' }}>{level}</button>;
-              })}
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 border-2 border-surface flex items-center justify-center bg-secondary-container">
+              <span className="material-symbols-outlined text-on-secondary-container" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1" }}>fact_check</span>
             </div>
-          </Field>
+            <div>
+              <h3 className="uppercase text-surface tracking-tighter leading-none" style={{ fontFamily: 'Archivo Narrow, sans-serif', fontSize: '20px', fontWeight: 700 }}>Schedule New Audit</h3>
+              <p className="text-surface-variant text-[10px] uppercase tracking-widest mt-0.5" style={{ fontFamily: 'JetBrains Mono, monospace' }}>Governance Compliance Module</p>
+            </div>
+          </div>
+          <button onClick={onClose} className="w-9 h-9 flex items-center justify-center border-2 border-surface bg-transparent hover:bg-surface/10 transition-colors" aria-label="Close dialog">
+            <span className="material-symbols-outlined text-surface" style={{ fontSize: '18px' }}>close</span>
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7">
+          <div className="space-y-5">
+            <Field name="title" label="Audit Title *" errors={errors}>
+              <input type="text" value={form.title} onChange={(e) => update('title', e.target.value)} placeholder="e.g. Annual ESG Compliance Review" className={inputClass('title', errors)} />
+            </Field>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field name="department" label="Target Department *" errors={errors}>
+                <select value={form.department} onChange={(e) => update('department', e.target.value)} className={`${inputClass('department', errors)} cursor-pointer`}>
+                  <option value="">Select dept...</option>
+                  {DEPARTMENT_OPTIONS.map(d => <option key={d} value={d}>{d}</option>)}
+                </select>
+              </Field>
+              <Field name="auditor" label="Assigned Auditor *" errors={errors}>
+                <input type="text" value={form.auditor} onChange={(e) => update('auditor', e.target.value)} placeholder="e.g. S. Nair" className={inputClass('auditor', errors)} />
+              </Field>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <Field name="dueDate" label="Target Due Date *" errors={errors}>
+                <input type="date" value={form.dueDate} onChange={(e) => update('dueDate', e.target.value)} className={inputClass('dueDate', errors)} />
+              </Field>
+              <Field name="scope" label="Audit Scope" errors={errors}>
+                <select value={form.scope} onChange={(e) => update('scope', e.target.value)} className={`${inputClass('scope', errors)} cursor-pointer`}>
+                  {['Internal', 'External', 'Third-Party', 'Regulatory'].map(s => <option key={s} value={s}>{s}</option>)}
+                </select>
+              </Field>
+            </div>
+
+            <Field name="priority" label="Priority Level" errors={errors}>
+              <div className="flex gap-3 pt-1">
+                {['Standard', 'High', 'Critical'].map((level) => {
+                  const active = form.priority === level;
+                  const colourMap = {
+                    Standard: active ? 'bg-secondary-container text-on-secondary-container' : 'bg-white',
+                    High: active ? 'bg-tertiary-fixed text-on-tertiary-fixed-variant' : 'bg-white',
+                    Critical: active ? 'bg-error-container text-error' : 'bg-white',
+                  };
+                  return (
+                    <button key={level} type="button" onClick={() => update('priority', level)}
+                      className={`flex-1 py-2.5 text-[10px] font-bold uppercase tracking-widest border-2 border-on-surface transition-all ${colourMap[level]}`}
+                      style={{ fontFamily: 'JetBrains Mono, monospace', boxShadow: active ? '3px 3px 0px 0px rgba(28,27,27,1)' : 'none' }}>
+                      {level}
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            <div className="flex items-start gap-3 p-4 border-2 border-on-surface bg-primary-fixed">
+              <span className="material-symbols-outlined text-on-surface shrink-0 mt-0.5" style={{ fontSize: '16px' }}>info</span>
+              <p className="text-[11px] text-on-surface uppercase leading-relaxed" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+                New audits default to <strong>Draft</strong> status. The assigned auditor will receive an in-app notification once submitted.
+              </p>
+            </div>
+          </div>
+
           <div className="mt-6 flex items-center justify-between">
-            <button type="button" onClick={onClose} className="text-[11px] font-bold uppercase text-on-surface-variant hover:text-on-surface">Cancel</button>
-            <button type="submit" className="flex items-center gap-2 px-8 py-3 border-2 border-on-surface text-sm font-bold uppercase" style={{ backgroundColor: '#38fe13', color: '#022100', boxShadow: '5px 5px 0px 0px rgba(28,27,27,1)' }}>
-              <span className="material-symbols-outlined" style={{ fontSize: '16px' }}>add_task</span> SCHEDULE AUDIT
+            <button type="button" onClick={onClose} className="text-[11px] font-bold uppercase text-on-surface-variant hover:text-on-surface transition-colors tracking-widest" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+              Cancel
+            </button>
+            <button type="submit" className="flex items-center gap-2 px-8 py-3 border-2 border-on-surface text-sm font-bold uppercase transition-all"
+              style={{ fontFamily: 'Archivo Narrow, sans-serif', backgroundColor: '#38fe13', color: '#022100', boxShadow: '5px 5px 0px 0px rgba(28,27,27,1)' }}>
+              <span className="material-symbols-outlined" style={{ fontSize: '16px', fontVariationSettings: "'FILL' 1" }}>add_task</span>
+              SCHEDULE AUDIT
             </button>
           </div>
         </form>
@@ -117,7 +171,7 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
   const [audits, setAudits] = useState([]);
   const [policies, setPolicies] = useState([]);
   const [complianceIssues, setComplianceIssues] = useState([]);
-  const [users, setUsers] = useState([]);
+  const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [newAuditOpen, setNewAuditOpen] = useState(false);
 
@@ -128,7 +182,7 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [resAudits, resPolicies, resIssues, resUsers] = await Promise.all([
+      const [resAudits, resPolicies, resIssues, resDepts] = await Promise.all([
         fetch(`${API_BASE}/audits/`),
         fetch(`${API_BASE}/policies/`),
         fetch(`${API_BASE}/compliance-issues/`),
@@ -137,7 +191,7 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
       if (resAudits.ok) setAudits(await resAudits.json());
       if (resPolicies.ok) setPolicies(await resPolicies.json());
       if (resIssues.ok) setComplianceIssues(await resIssues.json());
-      if (resUsers.ok) setUsers(await resUsers.json());
+      if (resDepts.ok) setDepartments(await resDepts.json());
     } catch {
       safeToast('Failed to load governance data.', 'error');
     }
@@ -155,7 +209,6 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
         safeToast(`Audit "${form.title}" scheduled · ${form.priority} priority`, 'success');
         fetchAll();
       } else {
-        // Optimistic fallback
         setAudits(prev => [{ id: Date.now(), title: form.title, auditor: form.auditor, date: form.dueDate, scope: form.scope, status: 'Draft' }, ...prev]);
         safeToast(`Audit "${form.title}" scheduled`, 'success');
       }
@@ -178,7 +231,6 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
   };
 
   const handleSendReminders = async () => {
-    // Trigger policy reminders via score recalculation endpoint (which calls check_policy_reminders)
     try {
       const res = await fetch(`${API_BASE}/system/calculate-scores/`, { method: 'POST' });
       safeToast(res.ok ? 'Policy reminders dispatched!' : 'Reminders sent (simulation).', 'success');
@@ -203,11 +255,9 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
     }
   };
 
-  // Compliance level per dept (derived from issues)
-  const deptCompliance = users.slice(0, 3).map(dept => {
-    const deptIssues = complianceIssues.filter(i => i.owner_username && dept.name);
-    const openCount = deptIssues.filter(i => i.status === 'Open' || i.status === 'Flagged').length;
-    const pct = Math.max(0, 100 - openCount * 10);
+  const deptCompliance = departments.slice(0, 3).map(dept => {
+    const openCount = complianceIssues.filter(i => (i.status === 'Open' || i.status === 'Flagged')).length;
+    const pct = Math.max(0, 100 - openCount * 5);
     return { name: dept.name, pct, badgeClass: pct >= 90 ? 'bg-secondary-fixed-dim text-on-secondary-fixed' : 'bg-tertiary-fixed text-on-tertiary-fixed-variant' };
   });
 
@@ -241,7 +291,7 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
               <div className="text-sm font-bold uppercase text-on-surface-variant py-8">Loading policies…</div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {(policies.length > 0 ? policies : []).map((policy) => (
+                {policies.length > 0 ? policies.map((policy) => (
                   <div key={policy.id} className="neo-brutalist-card p-6 relative overflow-hidden flex flex-col justify-between">
                     <div>
                       <div className="bg-on-surface text-surface w-fit px-2 py-0.5 text-[10px] font-label-bold mb-4 uppercase">
@@ -259,8 +309,7 @@ export default function Governance({ subPage, setSubPage, onNavigate, showToast,
                       </button>
                     </div>
                   </div>
-                ))}
-                {policies.length === 0 && !loading && (
+                )) : (
                   <div className="col-span-2 text-sm font-bold uppercase text-on-surface-variant py-8">No policies found.</div>
                 )}
               </div>

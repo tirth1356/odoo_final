@@ -214,7 +214,11 @@ class EmployeeParticipationViewSet(viewsets.ModelViewSet):
             data.get('proof_description'),
             data.get('proof_file_url'),
         )
-        participation = serializer.save()
+        # If employee isn't provided, use the current user, or fallback to first user (for dev)
+        employee = data.get('employee')
+        if not employee:
+            employee = self.request.user if self.request.user.is_authenticated else User.objects.first()
+        participation = serializer.save(employee=employee)
         if participation.approval_status == 'Approved':
             self.apply_csr_rewards(participation)
 
@@ -659,6 +663,12 @@ class ESGSystemViewSet(viewsets.ViewSet):
             serializer.save()
             return Response(serializer.data)
         return Response(SystemConfigSerializer(cfg).data)
+
+    @action(detail=False, methods=['post'], url_path='send-reminders')
+    def send_reminders(self, request):
+        check_policy_reminders()
+        check_compliance_deadlines()
+        return Response({"message": "Reminders sent successfully"})
 
     @action(detail=False, methods=['get'], url_path='export-report')
     def export_report(self, request):

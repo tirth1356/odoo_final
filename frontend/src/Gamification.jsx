@@ -52,6 +52,21 @@ const MOCK_REWARDS = [
   { id: 3, name: "Organic Tote Bag", points_required: 30, stock: 25 }
 ];
 
+const NewChallengeModalField = ({ name, label, children, errors }) => (
+  <div className="space-y-1.5">
+    <label className="block text-[11px] font-bold uppercase tracking-widest text-on-surface-variant" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+      {label}
+      {errors?.[name] && (
+        <span className="ml-2 text-error normal-case tracking-normal">— {errors[name]}</span>
+      )}
+    </label>
+    {children}
+  </div>
+);
+
+const getNewChallengeModalInputClass = (name, errors) =>
+  `w-full h-11 px-4 border-2 ${errors?.[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm text-black focus:outline-none focus:border-secondary transition-colors placeholder:text-gray-500 placeholder:text-[11px] placeholder:uppercase`;
+
 function NewChallengeModal({ isOpen, onClose, onSubmit }) {
   const [form, setForm] = useState({ title: '', description: '', reward: '' });
   const [errors, setErrors] = useState({});
@@ -91,21 +106,6 @@ function NewChallengeModal({ isOpen, onClose, onSubmit }) {
     onSubmit(form);
     onClose();
   };
-
-  const Field = ({ name, label, children }) => (
-    <div className="space-y-1.5">
-      <label className="block text-[11px] font-bold uppercase tracking-widest text-on-surface-variant" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-        {label}
-        {errors[name] && (
-          <span className="ml-2 text-error normal-case tracking-normal">— {errors[name]}</span>
-        )}
-      </label>
-      {children}
-    </div>
-  );
-
-  const inputClass = (name) =>
-    `w-full h-11 px-4 border-2 ${errors[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm text-black focus:outline-none focus:border-secondary transition-colors placeholder:text-gray-500 placeholder:text-[11px] placeholder:uppercase`;
 
   return (
     <div
@@ -154,35 +154,35 @@ function NewChallengeModal({ isOpen, onClose, onSubmit }) {
         {/* Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-7">
           <div className="space-y-5">
-            <Field name="title" label="Challenge Title *">
+            <NewChallengeModalField name="title" label="Challenge Title *" errors={errors}>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => update('title', e.target.value)}
                 placeholder="e.g. Zero Waste Week"
-                className={inputClass('title')}
+                className={getNewChallengeModalInputClass('title', errors)}
               />
-            </Field>
+            </NewChallengeModalField>
 
-            <Field name="description" label="Description *">
+            <NewChallengeModalField name="description" label="Description *" errors={errors}>
               <textarea
                 rows={4}
                 value={form.description}
                 onChange={(e) => update('description', e.target.value)}
                 placeholder="Describe the challenge and requirements..."
-                className={`${inputClass('description')} h-auto py-2`}
+                className={`${getNewChallengeModalInputClass('description', errors)} h-auto py-2`}
               />
-            </Field>
+            </NewChallengeModalField>
 
-            <Field name="reward" label="Reward *">
+            <NewChallengeModalField name="reward" label="Reward *" errors={errors}>
               <input
                 type="text"
                 value={form.reward}
                 onChange={(e) => update('reward', e.target.value)}
                 placeholder="e.g. 100 XP + 50 Points"
-                className={inputClass('reward')}
+                className={getNewChallengeModalInputClass('reward', errors)}
               />
-            </Field>
+            </NewChallengeModalField>
           </div>
 
           {/* Footer */}
