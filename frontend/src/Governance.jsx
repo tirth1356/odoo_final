@@ -23,7 +23,22 @@ const MOCK_DEPT_COMPLIANCE = [
   { name: "Admin & Corporate", percentage: "82% COMPLIANT", badgeClass: "bg-tertiary-fixed text-on-tertiary-fixed-variant" }
 ];
 
-const DEPARTMENT_OPTIONS = ["Finance", "Corporate", "Procurement", "Manufacturing", "Logistics", "Operations", "HR", "Legal", "IT"];
+const DEPARTMENT_OPTIONS = ["Finance", "Corporate", "Procurement", "Logistics", "Operations", "HR", "Legal", "IT"];
+
+const NewAuditModalField = ({ name, label, children, errors }) => (
+  <div className="space-y-1.5">
+    <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
+      {label}
+      {errors?.[name] && (
+        <span className="ml-2 text-error normal-case tracking-normal">— {errors[name]}</span>
+      )}
+    </label>
+    {children}
+  </div>
+);
+
+const getNewAuditModalInputClass = (name, errors) =>
+  `w-full h-11 px-4 border-2 ${errors?.[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm text-black focus:outline-none focus:border-secondary transition-colors placeholder:text-gray-500 placeholder:text-[11px] placeholder:uppercase`;
 
 /* ─────────────────────────────────────────────
    New Audit Modal  – styled Neo-Brutalist form
@@ -68,21 +83,6 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
     onSubmit(form);
     onClose();
   };
-
-  const Field = ({ name, label, children }) => (
-    <div className="space-y-1.5">
-      <label className="block text-[10px] font-bold uppercase tracking-widest text-on-surface-variant" style={{ fontFamily: 'JetBrains Mono, monospace' }}>
-        {label}
-        {errors[name] && (
-          <span className="ml-2 text-error normal-case tracking-normal">— {errors[name]}</span>
-        )}
-      </label>
-      {children}
-    </div>
-  );
-
-  const inputClass = (name) =>
-    `w-full h-11 px-4 border-2 ${errors[name] ? 'border-error' : 'border-on-surface'} bg-white text-sm text-black focus:outline-none focus:border-secondary transition-colors placeholder:text-gray-500 placeholder:text-[11px] placeholder:uppercase`;
 
   return (
     <div
@@ -133,69 +133,69 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
           <div className="space-y-5">
 
             {/* Audit Title */}
-            <Field name="title" label="Audit Title *">
+            <NewAuditModalField name="title" label="Audit Title *" errors={errors}>
               <input
                 type="text"
                 value={form.title}
                 onChange={(e) => update('title', e.target.value)}
                 placeholder="e.g. Annual ESG Compliance Review"
-                className={inputClass('title')}
+                className={getNewAuditModalInputClass('title', errors)}
               />
-            </Field>
+            </NewAuditModalField>
 
             {/* Department + Auditor row */}
             <div className="grid grid-cols-2 gap-4">
-              <Field name="department" label="Target Department *">
+              <NewAuditModalField name="department" label="Target Department *" errors={errors}>
                 <select
                   value={form.department}
                   onChange={(e) => update('department', e.target.value)}
-                  className={`${inputClass('department')} cursor-pointer`}
+                  className={`${getNewAuditModalInputClass('department', errors)} cursor-pointer`}
                 >
                   <option value="">Select dept...</option>
                   {DEPARTMENT_OPTIONS.map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
-              </Field>
+              </NewAuditModalField>
 
-              <Field name="auditor" label="Assigned Auditor *">
+              <NewAuditModalField name="auditor" label="Assigned Auditor *" errors={errors}>
                 <input
                   type="text"
                   value={form.auditor}
                   onChange={(e) => update('auditor', e.target.value)}
                   placeholder="e.g. S. Nair"
-                  className={inputClass('auditor')}
+                  className={getNewAuditModalInputClass('auditor', errors)}
                 />
-              </Field>
+              </NewAuditModalField>
             </div>
 
             {/* Due Date + Scope row */}
             <div className="grid grid-cols-2 gap-4">
-              <Field name="dueDate" label="Target Due Date *">
+              <NewAuditModalField name="dueDate" label="Target Due Date *" errors={errors}>
                 <input
                   type="date"
                   value={form.dueDate}
                   onChange={(e) => update('dueDate', e.target.value)}
-                  className={inputClass('dueDate')}
+                  className={getNewAuditModalInputClass('dueDate', errors)}
                 />
-              </Field>
+              </NewAuditModalField>
 
-              <Field name="scope" label="Audit Scope">
+              <NewAuditModalField name="scope" label="Audit Scope" errors={errors}>
                 <select
                   value={form.scope}
                   onChange={(e) => update('scope', e.target.value)}
-                  className={`${inputClass('scope')} cursor-pointer`}
+                  className={`${getNewAuditModalInputClass('scope', errors)} cursor-pointer`}
                 >
                   <option value="Internal">Internal</option>
                   <option value="External">External</option>
                   <option value="Third-Party">Third-Party</option>
                   <option value="Regulatory">Regulatory</option>
                 </select>
-              </Field>
+              </NewAuditModalField>
             </div>
 
             {/* Priority toggle chips */}
-            <Field name="priority" label="Priority Level">
+            <NewAuditModalField name="priority" label="Priority Level" errors={errors}>
               <div className="flex gap-3 pt-1">
                 {['Standard', 'High', 'Critical'].map((level) => {
                   const active = form.priority === level;
@@ -220,7 +220,7 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
                   );
                 })}
               </div>
-            </Field>
+            </NewAuditModalField>
 
             {/* Info strip */}
             <div className="flex items-start gap-3 p-4 border-2 border-on-surface bg-primary-fixed">
