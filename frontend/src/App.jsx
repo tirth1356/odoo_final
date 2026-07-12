@@ -273,13 +273,6 @@ function MainApp() {
           >
             <span className="material-symbols-outlined">settings</span>
           </button>
-          <div className="w-10 h-10 border-2 border-on-surface overflow-hidden">
-            <img 
-              className="w-full h-full object-cover" 
-              alt="Profile" 
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuAWiI26n6vaukJ0PitaUTp5zFCsmX6IHB-MuS6tlasJAvbu56SOPi1wtlMY2KaMTh919jBrr8QrTN6mr3hRX7-L5Kq6Nf6areCwv574rr8aEvv3bjnAM_w4HQKVZFHHxS7yBCj2kxcBK1KC_xCAZPpdcZanU_K6tVV39KLvB_1gOnFnyi1Iz_9Z_tpPz4NHXVyIN2FXwb-gKaPLo-Cv41R-GZBaRMQF-KqH9kbiPMK3VepqaXPI4z9YvA" 
-            />
-          </div>
         </div>
       </header>
 
@@ -410,15 +403,8 @@ function MainApp() {
 
           {/* Help & Logout */}
           <div className="pt-4 border-t-2 border-on-surface space-y-1 mt-auto">
-            <button 
-              className="flex items-center space-x-3 p-2 font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-on-surface w-full text-left" 
-              onClick={() => showToast('Help Center opened', 'info')}
-            >
-              <span className="material-symbols-outlined">help</span>
-              <span>Help Center</span>
-            </button>
-            <button 
-              className="flex items-center space-x-3 p-2 font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-error w-full text-left" 
+            <button
+              className="flex items-center space-x-3 p-2 font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-error w-full text-left"
               onClick={() => {
                 localStorage.removeItem('access_token');
                 localStorage.removeItem('refresh_token');
@@ -431,7 +417,10 @@ function MainApp() {
           </div>
 
           {/* User Widget */}
-          <div className="border-t-2 border-on-surface pt-6 flex items-center gap-4">
+          <button
+            onClick={() => setCurrentPage('gaming')}
+            className="border-t-2 border-on-surface pt-6 flex items-center gap-4 text-left w-full hover:opacity-80 transition-opacity"
+          >
             <div className="w-10 h-10 border-2 border-on-surface bg-primary-container text-on-primary-container flex items-center justify-center font-bold">
               {userProfile.username[0].toUpperCase()}
             </div>
@@ -439,7 +428,7 @@ function MainApp() {
               <div className="font-bold text-xs">@{userProfile.username}</div>
               <div className="text-[10px] font-label-bold text-secondary uppercase">{userProfile.points} Points | {userProfile.xp} XP</div>
             </div>
-          </div>
+          </button>
         </aside>
 
         {/* Dynamic View Canvas */}
