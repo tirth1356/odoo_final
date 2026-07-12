@@ -5,9 +5,11 @@ import Dashboard from './Dashboard';
 import Environmental from './Environmental';
 import Social from './Social';
 import Governance from './Governance';
+import Gamification from './Gamification';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 import SignupPage from './components/SignupPage';
+import Settings from './Settings';
 
 const API_BASE = 'http://localhost:8000/api';
 
@@ -51,6 +53,16 @@ const SUB_MODULES = {
       { id: 'audit', label: 'Audit Trail', icon: 'history' },
       { id: 'documents', label: 'Documents', icon: 'description' }
     ]
+  },
+  gaming: {
+    title: 'Gamification Sub-Modules',
+    items: [
+      { id: 'overview', label: 'Overview', icon: 'analytics' },
+      { id: 'metrics', label: 'Metrics', icon: 'bar_chart' },
+      { id: 'risk', label: 'Risk Assessment', icon: 'warning' },
+      { id: 'audit', label: 'Audit Trail', icon: 'history' },
+      { id: 'documents', label: 'Documents', icon: 'description' }
+    ]
   }
 };
 
@@ -66,6 +78,16 @@ function MainApp() {
   const [currentSubPage, setCurrentSubPage] = useState('overview');
   const [bellOpen, setBellOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [autoEmission, setAutoEmission] = useState(true);
+  const [evidenceReq, setEvidenceReq] = useState(true);
+  const [badgeAuto, setBadgeAuto] = useState(true);
+  const [notifSettings, setNotifSettings] = useState({
+    compliance: true,
+    csr: true,
+    reminders: true,
+    badges: true
+  });
   
   const showToast = (message, type = 'info') => {
     setToast({ message, type });
@@ -246,7 +268,7 @@ function MainApp() {
             )}
           </button>
           <button 
-            onClick={() => showToast('Settings menu opened', 'info')} 
+            onClick={() => setSettingsOpen(true)} 
             className="p-2 border-2 border-on-surface hover:bg-secondary-fixed transition-all"
           >
             <span className="material-symbols-outlined">settings</span>
@@ -282,7 +304,7 @@ function MainApp() {
       <div className="flex flex-grow pt-20">
         
         {/* Left Sidebar */}
-        <aside className="fixed left-0 top-20 h-[calc(100vh-80px)] w-64 bg-surface-container flex flex-col p-4 space-y-4 border-r-2 border-on-surface shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] overflow-y-auto z-40 select-none">
+        <aside className="fixed left-0 top-20 h-[calc(100vh-80px)] w-64 bg-surface-container flex flex-col p-4 space-y-4 border-r-2 border-on-surface sidebar-shadow overflow-y-auto z-40 select-none">
           
           {/* Logo Brand Header */}
           <div className="flex items-center space-x-3 mb-6 p-2 border-2 border-on-surface bg-surface">
@@ -301,27 +323,80 @@ function MainApp() {
 
           {/* Dynamic Module Sidebar Items */}
           <div className="space-y-2 flex-grow">
-            <div className="text-label-bold uppercase px-2 text-on-surface-variant opacity-60 mb-2">
-              {activeModule.title}
-            </div>
-            
-            {activeModule.items.map(item => {
-              const isActive = currentSubPage === item.id;
-              return (
+            {currentPage === 'governance' ? (
+              <>
+                <div className="text-[10px] font-label-bold uppercase px-2 text-on-surface-variant opacity-60 mb-2">
+                  Institutional ESG
+                </div>
                 <button
-                  key={item.id}
-                  onClick={() => setCurrentSubPage(item.id)}
-                  className={`flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left ${
-                    isActive 
-                      ? 'border-2 border-on-surface bg-secondary-container shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]' 
-                      : 'text-on-surface-variant hover:bg-primary-fixed'
-                  }`}
+                  onClick={() => {
+                    setCurrentPage('environmental');
+                    setCurrentSubPage('overview');
+                  }}
+                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
                 >
-                  <span className="material-symbols-outlined">{item.icon}</span>
-                  <span>{item.label}</span>
+                  <span className="material-symbols-outlined">eco</span>
+                  <span>Environmental</span>
                 </button>
-              );
-            })}
+                <button
+                  onClick={() => {
+                    setCurrentPage('social');
+                    setCurrentSubPage('overview');
+                  }}
+                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
+                >
+                  <span className="material-symbols-outlined">groups</span>
+                  <span>Social</span>
+                </button>
+                <button
+                  onClick={() => {
+                    setCurrentPage('governance');
+                    setCurrentSubPage('overview');
+                  }}
+                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left active-sidebar-btn bg-secondary-container text-on-secondary-container"
+                >
+                  <span className="material-symbols-outlined">gavel</span>
+                  <span>Governance</span>
+                </button>
+                <button
+                  onClick={() => showToast('Departments Overview - Simulating Data View', 'info')}
+                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
+                >
+                  <span className="material-symbols-outlined">corporate_fare</span>
+                  <span>Departments</span>
+                </button>
+                <button
+                  onClick={() => showToast('Employees Directory - Simulating Data View', 'info')}
+                  className="flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left text-on-surface-variant hover:bg-primary-fixed"
+                >
+                  <span className="material-symbols-outlined">badge</span>
+                  <span>Employees</span>
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-label-bold uppercase px-2 text-on-surface-variant opacity-60 mb-2">
+                  {activeModule.title}
+                </div>
+                {activeModule.items.map(item => {
+                  const isActive = currentSubPage === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setCurrentSubPage(item.id)}
+                      className={`flex items-center space-x-3 p-3 font-label-bold text-label-bold uppercase transition-all w-full text-left ${
+                        isActive 
+                          ? 'active-sidebar-btn bg-secondary-container text-on-secondary-container' 
+                          : 'text-on-surface-variant hover:bg-primary-fixed'
+                      }`}
+                    >
+                      <span className="material-symbols-outlined">{item.icon}</span>
+                      <span>{item.label}</span>
+                    </button>
+                  );
+                })}
+              </>
+            )}
 
             {/* Recalculate Impact */}
             <button 
@@ -370,67 +445,25 @@ function MainApp() {
         {/* Dynamic View Canvas */}
         <main className="lg:ml-64 flex-grow p-6 md:p-10 max-w-6xl mx-auto w-full pb-24">
           {currentPage === 'dashboard' && <Dashboard subPage={currentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
-          {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
-          {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
+          {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} autoEmission={autoEmission} />}
+          {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} evidenceReq={evidenceReq} badgeAuto={badgeAuto} notifSettings={notifSettings} />}
           {currentPage === 'governance' && <Governance subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
 
           {currentPage === 'gaming' && (
-            <div className="space-y-12">
-              {/* Profile card */}
-              <div className="bg-white border-2 border-on-surface p-6 brutalist-shadow flex justify-between items-center">
-                <div>
-                  <h3 className="font-headline-lg text-headline-lg uppercase">@{userProfile.username}</h3>
-                  <span className="font-label-bold text-label-bold text-primary uppercase">MEMBER TIER STATUS</span>
-                </div>
-                <div className="text-right">
-                  <div className="text-headline-md font-bold text-secondary">{userProfile.points} Pts</div>
-                  <div className="text-xs font-bold text-tertiary">{userProfile.xp} XP Accumulated</div>
-                </div>
-              </div>
-
-              {/* Quests */}
-              <div>
-                <h3 className="font-headline-md text-headline-md uppercase mb-4">ACTIVE QUESTS & CHALLENGES</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {challenges.map(c => (
-                    <div key={c.id} className="bg-white border-2 border-on-surface p-6 brutalist-shadow flex flex-col justify-between">
-                      <div>
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="bg-secondary-container text-on-secondary-container border border-on-surface px-2 py-1 text-[10px] font-bold uppercase">{c.difficulty}</span>
-                          <span className="font-label-bold text-xs text-secondary">+{c.xp} XP</span>
-                        </div>
-                        <h4 className="font-headline-md text-headline-md uppercase">{c.title}</h4>
-                        <p className="text-xs text-on-surface-variant mt-2 uppercase">Deadline: {c.deadline}</p>
-                      </div>
-                      <button className="w-full mt-4 bg-primary text-white font-label-bold text-xs py-3 border-2 border-on-surface brutalist-shadow-active" onClick={() => showToast("Submission logged for evaluation!", 'success')}>
-                        SUBMIT COMPLETION
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Rewards */}
-              <div>
-                <h3 className="font-headline-md text-headline-md uppercase mb-4">REDEEM VOUCHERS SHOP</h3>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {rewards.map(r => (
-                    <div key={r.id} className="bg-white border-2 border-on-surface p-6 brutalist-shadow flex flex-col justify-between">
-                      <div>
-                        <div className="bg-tertiary-fixed text-on-tertiary-fixed-variant px-3 py-1 border border-on-surface font-label-bold text-xs uppercase inline-block mb-3">
-                          {r.points_required} Points
-                        </div>
-                        <h4 className="font-headline-md text-headline-md uppercase">{r.name}</h4>
-                        <p className="text-xs text-on-surface-variant mt-2 uppercase">Stock left: {r.stock} units</p>
-                      </div>
-                      <button className="w-full mt-6 bg-secondary text-on-secondary font-label-bold text-xs py-3 border-2 border-on-surface brutalist-shadow-active" onClick={() => redeemReward(r.id)} disabled={r.stock === 0}>
-                        REDEEM VOUCHER
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <Gamification 
+              subPage={currentSubPage} 
+              setSubPage={setCurrentSubPage} 
+              onNavigate={setCurrentPage} 
+              showToast={showToast} 
+              badgeAuto={badgeAuto} 
+              notifSettings={notifSettings}
+              userProfile={userProfile}
+              setUserProfile={setUserProfile}
+              notifications={notifications}
+              setNotifications={setNotifications}
+              rewards={rewards}
+              setRewards={setRewards}
+            />
           )}
 
           {currentPage === 'reports' && (
@@ -494,6 +527,20 @@ function MainApp() {
           <span className="text-[10px] font-label-bold uppercase">Gaming</span>
         </div>
       </nav>
+
+      <Settings 
+        isOpen={settingsOpen} 
+        onClose={() => setSettingsOpen(false)} 
+        autoEmission={autoEmission} 
+        setAutoEmission={setAutoEmission} 
+        evidenceReq={evidenceReq} 
+        setEvidenceReq={setEvidenceReq} 
+        badgeAuto={badgeAuto} 
+        setBadgeAuto={setBadgeAuto} 
+        notifSettings={notifSettings} 
+        setNotifSettings={setNotifSettings} 
+        showToast={showToast} 
+      />
     </div>
   );
 }

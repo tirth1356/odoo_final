@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>ESG INTELLIGENCE | Gamification &amp; Rewards</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700;800&amp;family=JetBrains+Mono:wght@700&amp;family=Hanken+Grotesk:wght@400;700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-tertiary-fixed": "#3a0b00",
+                        "on-background": "#1c1b1b",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-container": "#697963",
+                        "background": "#fcf9f8",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#111f0f",
+                        "surface-variant": "#e5e2e1",
+                        "on-primary-fixed-variant": "#3b4b37",
+                        "tertiary-container": "#d43f00",
+                        "surface-container-high": "#eae7e7",
+                        "surface-container": "#f0eded",
+                        "outline-variant": "#c4c8bf",
+                        "surface": "#fcf9f8",
+                        "tertiary": "#aa3000",
+                        "tertiary-fixed-dim": "#ffb59e",
+                        "inverse-surface": "#313030",
+                        "primary-fixed-dim": "#baccb2",
+                        "on-secondary-container": "#107100",
+                        "surface-bright": "#fcf9f8",
+                        "on-error-container": "#93000a",
+                        "outline": "#747871",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-surface-variant": "#444841",
+                        "primary": "#50604b",
+                        "on-primary-container": "#f8fff0",
+                        "inverse-primary": "#baccb2",
+                        "on-primary": "#ffffff",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary": "#106e00",
+                        "on-surface": "#1c1b1b",
+                        "on-tertiary-fixed-variant": "#852400",
+                        "inverse-on-surface": "#f3f0ef",
+                        "secondary-container": "#38fe13",
+                        "surface-tint": "#53634e",
+                        "secondary-fixed-dim": "#2ae500",
+                        "on-secondary-fixed-variant": "#095300",
+                        "secondary-fixed": "#79ff5b",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#fffbff",
+                        "on-error": "#ffffff",
+                        "surface-dim": "#dcd9d9",
+                        "on-tertiary": "#ffffff",
+                        "primary-fixed": "#d6e8cd",
+                        "on-secondary-fixed": "#022100",
+                        "surface-container-highest": "#e5e2e1"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0px",
+                        "lg": "0px",
+                        "xl": "0px",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "shadow-offset": "4px",
+                        "margin-mobile": "16px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Archivo Narrow"],
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "headline-md": ["Archivo Narrow"],
+                        "label-bold": ["JetBrains Mono"],
+                        "display-lg": ["Archivo Narrow"],
+                        "body-md": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "label-bold": ["12px", { "lineHeight": "1.4", "fontWeight": "700" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }]
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .brutalist-card {
+            border: 2px solid #1c1b1b;
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+            transition: all 0.1s ease-in-out;
+        }
+
+        .brutalist-card:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        .brutalist-card:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        .brutalist-btn {
+            border: 2px solid #1c1b1b;
+            box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+            transition: all 0.1s ease-in-out;
+            cursor: pointer;
+        }
+
+        .brutalist-btn:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px 0px rgba(0, 0, 0, 1);
+        }
+
+        .brutalist-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 0px 0px 0px 0px rgba(0, 0, 0, 1);
+        }
+    </style>
+</head>
+
+<body class="bg-background text-on-background font-body-md overflow-x-hidden">
+    <!-- TopNavBar -->
+    <header
+        class="sticky top-0 w-full z-50 flex justify-between items-center px-margin-desktop h-20 bg-surface border-b-2 border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="flex items-center gap-8">
+            <h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter text-on-surface">ESG INTELLIGENCE
+            </h1>
+            <nav class="hidden lg:flex gap-6">
+                <a class="text-on-surface-variant font-bold uppercase hover:text-secondary-fixed transition-all"
+                    href="#">Dashboard</a>
+                <a class="text-on-surface-variant font-bold uppercase hover:text-secondary-fixed transition-all"
+                    href="#">Environmental</a>
+                <a class="text-on-surface-variant font-bold uppercase hover:text-secondary-fixed transition-all"
+                    href="#">Social</a>
+                <a class="text-on-surface-variant font-bold uppercase hover:text-secondary-fixed transition-all"
+                    href="#">Governance</a>
+                <a class="text-secondary border-b-4 border-secondary font-bold uppercase" href="#">Gamification</a>
+                <a class="text-on-surface-variant font-bold uppercase hover:text-secondary-fixed transition-all"
+                    href="#">Reports</a>
+            </nav>
+        </div>
+        <div class="flex items-center gap-4">
+            <span
+                class="material-symbols-outlined text-on-surface cursor-pointer p-2 hover:bg-secondary-fixed transition-all">notifications</span>
+            <span
+                class="material-symbols-outlined text-on-surface cursor-pointer p-2 hover:bg-secondary-fixed transition-all">settings</span>
+            <div class="w-10 h-10 border-2 border-on-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] overflow-hidden">
+                <img class="w-full h-full object-cover"
+                    data-alt="A close-up professional corporate portrait of a user with a neutral, modern background. High contrast, sharp focus, in a professional ESG business context with minimalist lighting."
+                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm7DVipNfkuw8TzyfaxZ7ZZSSWsxpCKkoeRWcUvwN1aPbjYl7hobZNu5B7g-6pvzk8QAdpKfT23aSilMuWqLYnxG-Ih-iOJ3wg47SAVykC3VEXc9x4GSzsyEKVMiZA4N5JbrXY7yE4lXo9BjW_KEFWbLHgnlUF1A9vsBIK8A0Hzf_5jzu5anuzQCl8yprtj9RZjSPeBA-Pnc34Xc8gCmU2l1U-8qx_Yp9Fxvx6e8mKoKaV7eu0_bfXuQ" />
+            </div>
+        </div>
+    </header>
+    <!-- Sidebar & Main Content Wrapper -->
+    <div class="flex">
+        <!-- SideNavBar -->
+        <aside
+            class="fixed left-0 top-20 h-[calc(100vh-80px)] w-64 bg-surface-container border-r-2 border-on-surface shadow-[4px_0px_0px_0px_rgba(0,0,0,1)] flex flex-col p-4 space-y-4 hidden md:flex">
+            <div class="mb-4">
+                <div
+                    class="flex items-center gap-3 p-2 border-2 border-on-surface bg-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                    <span class="material-symbols-outlined">corporate_fare</span>
+                    <div>
+                        <div class="font-headline-md text-headline-md text-on-surface leading-tight">Institutional ESG
+                        </div>
+                        <div class="text-[10px] font-label-bold uppercase">Verified Portfolio</div>
+                    </div>
+                </div>
+            </div>
+            <nav class="flex flex-col gap-2">
+                <a class="flex items-center gap-3 p-3 font-label-bold uppercase text-on-surface-variant hover:bg-primary-fixed transition-all"
+                    href="#">
+                    <span class="material-symbols-outlined">analytics</span> Overview
+                </a>
+                <a class="flex items-center gap-3 p-3 font-label-bold uppercase bg-secondary-container text-on-secondary-container border-2 border-on-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]"
+                    href="#">
+                    <span class="material-symbols-outlined">bar_chart</span> Metrics
+                </a>
+                <a class="flex items-center gap-3 p-3 font-label-bold uppercase text-on-surface-variant hover:bg-primary-fixed transition-all"
+                    href="#">
+                    <span class="material-symbols-outlined">warning</span> Risk Assessment
+                </a>
+                <a class="flex items-center gap-3 p-3 font-label-bold uppercase text-on-surface-variant hover:bg-primary-fixed transition-all"
+                    href="#">
+                    <span class="material-symbols-outlined">history</span> Audit Trail
+                </a>
+                <a class="flex items-center gap-3 p-3 font-label-bold uppercase text-on-surface-variant hover:bg-primary-fixed transition-all"
+                    href="#">
+                    <span class="material-symbols-outlined">description</span> Documents
+                </a>
+            </nav>
+            <button
+                class="mt-auto brutalist-btn bg-tertiary text-on-tertiary-container p-3 font-label-bold uppercase tracking-wider">
+                RECALCULATE IMPACT
+            </button>
+            <div class="pt-4 border-t-2 border-on-surface flex flex-col gap-2">
+                <a class="flex items-center gap-3 p-2 font-label-bold uppercase text-on-surface-variant hover:text-primary"
+                    href="#">
+                    <span class="material-symbols-outlined">help</span> Help Center
+                </a>
+                <a class="flex items-center gap-3 p-2 font-label-bold uppercase text-on-surface-variant hover:text-error"
+                    href="#">
+                    <span class="material-symbols-outlined">logout</span> Log Out
+                </a>
+            </div>
+        </aside>
+        <!-- Main Content Canvas -->
+        <main class="md:ml-64 w-full p-8 pb-20 bg-background min-h-screen">
+            <!-- Page Header -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end mb-10 gap-4">
+                <div>
+                    <h2 class="font-display-lg text-display-lg uppercase leading-none mb-2">CHALLENGES &amp; REWARDS
+                    </h2>
+                    <p class="text-on-surface-variant font-body-lg max-w-2xl italic border-l-4 border-primary pl-4">
+                        Gamified environmental accountability. Participate in corporate-wide initiatives to earn
+                        verified ESG tokens.</p>
+                </div>
+                <button
+                    class="brutalist-btn bg-secondary-container text-on-secondary-fixed p-4 font-headline-md uppercase flex items-center gap-2">
+                    <span class="material-symbols-outlined">add_circle</span> NEW CHALLENGE
+                </button>
+            </div>
+            <!-- Top Stats Row -->
+            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-gutter mb-12">
+                <div class="brutalist-card bg-surface p-6 flex flex-col justify-between">
+                    <div>
+                        <span class="font-label-bold uppercase text-on-surface-variant block mb-1">Current XP</span>
+                        <div class="font-display-lg text-display-lg leading-none">2,450 <span
+                                class="text-headline-md font-headline-md">XP</span></div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="h-4 border-2 border-on-surface bg-surface-container-low overflow-hidden">
+                            <div class="h-full bg-secondary w-3/4"></div>
+                        </div>
+                        <div class="flex justify-between mt-1">
+                            <span class="text-[10px] font-label-bold">LVL 12</span>
+                            <span class="text-[10px] font-label-bold">550 XP TO NEXT</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="brutalist-card bg-surface p-6">
+                    <span class="font-label-bold uppercase text-on-surface-variant block mb-1">Current Badge</span>
+                    <div class="flex items-center gap-4 mt-2">
+                        <div
+                            class="w-16 h-16 bg-primary-fixed border-2 border-on-surface flex items-center justify-center">
+                            <span class="material-symbols-outlined text-[40px]"
+                                style="font-variation-settings: 'FILL' 1;">eco</span>
+                        </div>
+                        <div>
+                            <div class="font-headline-md text-headline-md leading-tight">Sustainability Hero</div>
+                            <div class="text-[10px] font-label-bold uppercase text-secondary">Verified Oct 2023</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="brutalist-card bg-surface p-6">
+                    <span class="font-label-bold uppercase text-on-surface-variant block mb-1">Your Rank</span>
+                    <div class="font-display-lg text-display-lg leading-none">#4</div>
+                    <div class="font-label-bold uppercase mt-2 text-on-surface-variant">Engineering Dept</div>
+                    <div
+                        class="mt-2 py-1 px-2 bg-secondary-fixed text-on-secondary-fixed inline-block font-label-bold text-[10px] border border-on-surface">
+                        TOP 5% THIS MONTH
+                    </div>
+                </div>
+                <div class="brutalist-card bg-surface p-6 flex flex-col justify-between">
+                    <div>
+                        <span class="font-label-bold uppercase text-on-surface-variant block mb-1">Rewards</span>
+                        <div class="font-display-lg text-display-lg leading-none">3 <span
+                                class="text-headline-md font-headline-md">AVAILABLE</span></div>
+                    </div>
+                    <a class="mt-4 flex items-center gap-2 font-label-bold uppercase text-secondary hover:underline"
+                        href="#">
+                        VIEW REDEMPTION SHOP <span class="material-symbols-outlined text-[14px]">arrow_forward</span>
+                    </a>
+                </div>
+            </section>
+            <!-- Main Content Area -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-gutter">
+                <!-- Left: Active Challenges -->
+                <div class="xl:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="font-headline-lg text-headline-lg uppercase border-b-4 border-on-surface">Active
+                            Challenges</h3>
+                        <div class="flex gap-2">
+                            <button
+                                class="w-8 h-8 border-2 border-on-surface flex items-center justify-center bg-surface brutalist-btn"><span
+                                    class="material-symbols-outlined">chevron_left</span></button>
+                            <button
+                                class="w-8 h-8 border-2 border-on-surface flex items-center justify-center bg-surface brutalist-btn"><span
+                                    class="material-symbols-outlined">chevron_right</span></button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-gutter">
+                        <!-- Challenge Card 1 -->
+                        <div class="brutalist-card bg-surface overflow-hidden flex flex-col">
+                            <div class="h-40 bg-surface-container-high relative">
+                                <img class="w-full h-full object-cover grayscale brightness-75"
+                                    data-alt="A gritty, cinematic photo of rows of bicycles in a modern urban commuter hub, highlighting industrial textures, clean lines, and architectural shadows. Low angle shot, morning sunlight, ESG focused aesthetic."
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuBfz27TeNeXpRZT__7wibFUxnulEqSAJsITnCI653-ir6FOJ5LBd-wf2WNTYvConjurMkSwlacgW_eMwDmfpBV1cAdkUIWJkjlpo7p1qymW0TUM-DRJxi09Lzns-Sg8dVj1btvhnY2WwIvq1EL7B1Wj6ouozljLnFEG2HjBZC1_ck2-YHanOW3MbScW1YPt96vrKvxmsypiJN7EEqeXChteRdNGNTdEUUtmKAdR02PRbJprn98Q90HzDA" />
+                                <div
+                                    class="absolute top-4 left-4 bg-secondary-fixed text-on-secondary-fixed px-3 py-1 font-label-bold border-2 border-on-surface uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                                    ONGOING
+                                </div>
+                            </div>
+                            <div class="p-6 flex-grow">
+                                <h4 class="font-headline-md text-headline-md uppercase mb-2">No Single-Use Plastics Week
+                                </h4>
+                                <p class="text-on-surface-variant font-body-md mb-6">Commit to zero-waste lunches for 5
+                                    consecutive days. Documentation required via portal.</p>
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="flex -space-x-3">
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-primary-fixed-dim rounded-full">
+                                        </div>
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-secondary-fixed-dim rounded-full">
+                                        </div>
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-tertiary-fixed-dim rounded-full">
+                                        </div>
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-surface flex items-center justify-center text-[10px] font-label-bold rounded-full">
+                                            +42</div>
+                                    </div>
+                                    <span class="text-[10px] font-label-bold uppercase text-on-surface-variant">45
+                                        Participants</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-label-bold uppercase text-on-tertiary-fixed-variant">7 Days
+                                        Left</span>
+                                    <button
+                                        class="brutalist-btn bg-on-background text-surface px-4 py-2 font-label-bold uppercase">Log
+                                        Activity</button>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Challenge Card 2 -->
+                        <div class="brutalist-card bg-surface overflow-hidden flex flex-col">
+                            <div class="h-40 bg-surface-container-high relative">
+                                <img class="w-full h-full object-cover grayscale brightness-75"
+                                    data-alt="A professional architectural photograph of a futuristic office rooftop garden. Heavy brutalist concrete structures mixed with vibrant green foliage. Dramatic shadows, overcast sky, high-contrast ESG environmental design."
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuAGbwrWFIrOl-RZU6UdcJNsu0p7C39pXNb8tRjMDODVAiBRtnWyoCyQLycnorAUTK2ILlzlNEVPlGxncK7Z1ZHoGvBZJPboz-Sibzk97FvDZTDOftkm5EHWoDVVnsZQWdNLEMRMg0kJhaXAaJkJTsbzDzCiq0pFaoZ6qLviG6-hNRktMoAw5zwlq3MEzkIq1h_3g2DYhQ3cj3KZNg24Oi75288zJjLneLxlxx8wbEepHQsiyaYdAc-IRA" />
+                                <div
+                                    class="absolute top-4 left-4 bg-secondary-fixed text-on-secondary-fixed px-3 py-1 font-label-bold border-2 border-on-surface uppercase shadow-[2px_2px_0px_0px_rgba(0,0,0,1)]">
+                                    ONGOING
+                                </div>
+                            </div>
+                            <div class="p-6 flex-grow">
+                                <h4 class="font-headline-md text-headline-md uppercase mb-2">Bike to Work Day</h4>
+                                <p class="text-on-surface-variant font-body-md mb-6">Track your commute with the
+                                    corporate app. Reduce carbon footprint per kilometer.</p>
+                                <div class="flex items-center gap-4 mb-6">
+                                    <div class="flex -space-x-3">
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-primary-fixed-dim rounded-full">
+                                        </div>
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-secondary-fixed-dim rounded-full">
+                                        </div>
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-tertiary-fixed-dim rounded-full">
+                                        </div>
+                                        <div
+                                            class="w-8 h-8 border-2 border-on-surface bg-surface flex items-center justify-center text-[10px] font-label-bold rounded-full">
+                                            +128</div>
+                                    </div>
+                                    <span class="text-[10px] font-label-bold uppercase text-on-surface-variant">131
+                                        Participants</span>
+                                </div>
+                                <div class="flex justify-between items-center">
+                                    <span class="font-label-bold uppercase text-on-tertiary-fixed-variant">Ends
+                                        Tomorrow</span>
+                                    <button
+                                        class="brutalist-btn bg-secondary text-surface px-4 py-2 font-label-bold uppercase">JOIN
+                                        NOW</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Badge Gallery Section -->
+                    <div class="mt-12">
+                        <h3
+                            class="font-headline-lg text-headline-lg uppercase mb-6 border-b-4 border-on-surface inline-block">
+                            Badge Gallery</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                            <!-- Unlocked Badge -->
+                            <div class="brutalist-card bg-surface p-4 flex flex-col items-center text-center">
+                                <div
+                                    class="w-12 h-12 bg-primary text-on-primary flex items-center justify-center mb-2 border-2 border-on-surface">
+                                    <span class="material-symbols-outlined"
+                                        style="font-variation-settings: 'FILL' 1;">park</span>
+                                </div>
+                                <div class="font-label-bold uppercase leading-tight text-[10px]">Green Beginner</div>
+                                <div class="text-[8px] font-label-bold text-secondary mt-1 uppercase">UNLOCKED</div>
+                            </div>
+                            <!-- Unlocked Badge -->
+                            <div class="brutalist-card bg-surface p-4 flex flex-col items-center text-center">
+                                <div
+                                    class="w-12 h-12 bg-secondary text-on-secondary flex items-center justify-center mb-2 border-2 border-on-surface">
+                                    <span class="material-symbols-outlined"
+                                        style="font-variation-settings: 'FILL' 1;">bolt</span>
+                                </div>
+                                <div class="font-label-bold uppercase leading-tight text-[10px]">Carbon Saver</div>
+                                <div class="text-[8px] font-label-bold text-secondary mt-1 uppercase">UNLOCKED</div>
+                            </div>
+                            <!-- Locked Badge -->
+                            <div
+                                class="brutalist-card bg-surface-container p-4 flex flex-col items-center text-center opacity-60">
+                                <div
+                                    class="w-12 h-12 bg-surface flex items-center justify-center mb-2 border-2 border-on-surface border-dashed">
+                                    <span class="material-symbols-outlined text-outline">lock</span>
+                                </div>
+                                <div class="font-label-bold uppercase leading-tight text-[10px]">ESG Champion</div>
+                                <div class="text-[8px] font-label-bold text-on-surface-variant mt-1 uppercase italic">
+                                    Reach 5,000 XP</div>
+                            </div>
+                            <!-- Locked Badge -->
+                            <div
+                                class="brutalist-card bg-surface-container p-4 flex flex-col items-center text-center opacity-60">
+                                <div
+                                    class="w-12 h-12 bg-surface flex items-center justify-center mb-2 border-2 border-on-surface border-dashed">
+                                    <span class="material-symbols-outlined text-outline">lock</span>
+                                </div>
+                                <div class="font-label-bold uppercase leading-tight text-[10px]">Water Guard</div>
+                                <div class="text-[8px] font-label-bold text-on-surface-variant mt-1 uppercase italic">
+                                    Complete 3 Challenges</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Right: Leaderboard -->
+                <aside>
+                    <div class="brutalist-card bg-surface p-0 flex flex-col h-fit sticky top-28">
+                        <div class="bg-on-surface text-surface p-4 border-b-2 border-on-surface">
+                            <h3 class="font-headline-md text-headline-md uppercase">Top Contributors</h3>
+                            <p class="text-[10px] font-label-bold uppercase opacity-80">This Quarter</p>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+                                <!-- Rank 1 -->
+                                <div
+                                    class="flex items-center gap-3 p-3 border-2 border-on-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-primary-fixed">
+                                    <div class="font-display-lg text-[24px] w-8">#1</div>
+                                    <div class="flex-grow">
+                                        <div class="font-label-bold uppercase leading-none">Arjun Mehta</div>
+                                        <div class="text-[10px] font-label-bold uppercase opacity-60">Operations</div>
+                                    </div>
+                                    <div class="font-headline-md text-headline-md">4,820</div>
+                                </div>
+                                <!-- Rank 2 -->
+                                <div
+                                    class="flex items-center gap-3 p-3 border-2 border-on-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-surface">
+                                    <div class="font-display-lg text-[24px] w-8">#2</div>
+                                    <div class="flex-grow">
+                                        <div class="font-label-bold uppercase leading-none">Sarah Chen</div>
+                                        <div class="text-[10px] font-label-bold uppercase opacity-60">Logistics</div>
+                                    </div>
+                                    <div class="font-headline-md text-headline-md">4,215</div>
+                                </div>
+                                <!-- Rank 3 -->
+                                <div
+                                    class="flex items-center gap-3 p-3 border-2 border-on-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-surface">
+                                    <div class="font-display-lg text-[24px] w-8">#3</div>
+                                    <div class="flex-grow">
+                                        <div class="font-label-bold uppercase leading-none">Elena Rossi</div>
+                                        <div class="text-[10px] font-label-bold uppercase opacity-60">R&amp;D</div>
+                                    </div>
+                                    <div class="font-headline-md text-headline-md">3,910</div>
+                                </div>
+                                <!-- Rank 4 (YOU) -->
+                                <div
+                                    class="flex items-center gap-3 p-3 border-2 border-secondary bg-secondary-container shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] ring-2 ring-on-surface">
+                                    <div class="font-display-lg text-[24px] w-8">#4</div>
+                                    <div class="flex-grow">
+                                        <div class="font-label-bold uppercase leading-none">Divy (You)</div>
+                                        <div class="text-[10px] font-label-bold uppercase opacity-60">Engineering</div>
+                                    </div>
+                                    <div class="font-headline-md text-headline-md">2,450</div>
+                                </div>
+                                <!-- Rank 5 -->
+                                <div
+                                    class="flex items-center gap-3 p-3 border-2 border-on-surface shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] bg-surface">
+                                    <div class="font-display-lg text-[24px] w-8">#5</div>
+                                    <div class="flex-grow">
+                                        <div class="font-label-bold uppercase leading-none">Marcus Weber</div>
+                                        <div class="text-[10px] font-label-bold uppercase opacity-60">Finance</div>
+                                    </div>
+                                    <div class="font-headline-md text-headline-md">2,105</div>
+                                </div>
+                            </div>
+                            <button
+                                class="w-full brutalist-btn mt-6 py-2 bg-surface-container font-label-bold uppercase text-[10px]">View
+                                Full Leaderboard</button>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+            <!-- Lifecycle Directory Section -->
+            <section class="mt-20">
+                <h3 class="font-headline-lg text-headline-lg uppercase mb-6 border-b-4 border-on-surface inline-block">
+                    Challenge Directory</h3>
+                <!-- Lifecycle Tabs -->
+                <div class="flex flex-wrap gap-2 mb-6">
+                    <button
+                        class="px-4 py-2 border-2 border-on-surface font-label-bold uppercase bg-on-surface text-surface">Draft</button>
+                    <button
+                        class="px-4 py-2 border-2 border-on-surface font-label-bold uppercase bg-secondary-container text-on-secondary-container">Active</button>
+                    <button
+                        class="px-4 py-2 border-2 border-on-surface font-label-bold uppercase bg-tertiary-fixed text-on-tertiary-fixed">Under
+                        Review</button>
+                    <button
+                        class="px-4 py-2 border-2 border-on-surface font-label-bold uppercase bg-surface">Completed</button>
+                    <button
+                        class="px-4 py-2 border-2 border-on-surface font-label-bold uppercase bg-surface opacity-50">Archived</button>
+                </div>
+                <div class="brutalist-card bg-surface overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="border-b-2 border-on-surface bg-surface-container">
+                            <tr>
+                                <th class="p-4 font-label-bold uppercase text-[12px]">Title</th>
+                                <th class="p-4 font-label-bold uppercase text-[12px]">Type</th>
+                                <th class="p-4 font-label-bold uppercase text-[12px]">Difficulty</th>
+                                <th class="p-4 font-label-bold uppercase text-[12px]">Reward</th>
+                                <th class="p-4 font-label-bold uppercase text-[12px]">Deadline</th>
+                                <th class="p-4 font-label-bold uppercase text-[12px] text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-on-surface/10 font-label-bold uppercase text-[12px]">
+                            <tr class="hover:bg-primary-fixed-dim transition-all">
+                                <td class="p-4">Sustainability Sprint</td>
+                                <td class="p-4"><span class="flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-[16px]">public</span> Global</span>
+                                </td>
+                                <td class="p-4"><span
+                                        class="px-2 py-0.5 border border-on-surface bg-tertiary text-on-tertiary">HARD</span>
+                                </td>
+                                <td class="p-4">200 XP + TOKEN</td>
+                                <td class="p-4">07/20</td>
+                                <td class="p-4 text-right"><span
+                                        class="material-symbols-outlined cursor-pointer">open_in_new</span></td>
+                            </tr>
+                            <tr class="hover:bg-primary-fixed-dim transition-all">
+                                <td class="p-4">Recycle Challenge</td>
+                                <td class="p-4"><span class="flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-[16px]">recycling</span> Dept</span>
+                                </td>
+                                <td class="p-4"><span
+                                        class="px-2 py-0.5 border border-on-surface bg-secondary text-on-secondary">EASY</span>
+                                </td>
+                                <td class="p-4">80 XP</td>
+                                <td class="p-4">07/15</td>
+                                <td class="p-4 text-right"><span
+                                        class="material-symbols-outlined cursor-pointer">open_in_new</span></td>
+                            </tr>
+                            <tr class="hover:bg-primary-fixed-dim transition-all">
+                                <td class="p-4">Solar Installation Review</td>
+                                <td class="p-4"><span class="flex items-center gap-1"><span
+                                            class="material-symbols-outlined text-[16px]">solar_power</span>
+                                        Special</span></td>
+                                <td class="p-4"><span
+                                        class="px-2 py-0.5 border border-on-surface bg-primary text-on-primary">MEDIUM</span>
+                                </td>
+                                <td class="p-4">120 XP</td>
+                                <td class="p-4">07/25</td>
+                                <td class="p-4 text-right"><span
+                                        class="material-symbols-outlined cursor-pointer">open_in_new</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+    <!-- Footer -->
+    <footer
+        class="w-full py-8 px-margin-desktop flex flex-col md:flex-row justify-between items-center gap-4 bg-on-surface text-surface border-t-2 border-on-surface relative z-10">
+        <div class="font-headline-md text-headline-md uppercase tracking-tighter">© 2024 ESG INTELLIGENCE PARTNERS. ZERO
+            FLUFF DATA.</div>
+        <div class="flex flex-wrap gap-6 font-label-bold uppercase text-[10px]">
+            <a class="hover:text-secondary-fixed underline" href="#">Terms of Service</a>
+            <a class="hover:text-secondary-fixed underline" href="#">Privacy Protocol</a>
+            <a class="hover:text-secondary-fixed underline" href="#">API Documentation</a>
+            <a class="hover:text-secondary-fixed underline" href="#">Compliance standards</a>
+        </div>
+    </footer>
+    <script>
+        // Micro-interaction: Update progress bar animation on load
+        document.addEventListener('DOMContentLoaded', () => {
+            const progressBar = document.querySelector('.bg-secondary.w-3\/4');
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.transition = 'width 1.5s cubic-bezier(0.65, 0, 0.35, 1)';
+                progressBar.style.width = '75%';
+            }, 500);
+        });
+
+        // Hover lift effect for brutalist cards
+        document.querySelectorAll('.brutalist-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                // Card interaction already handled by CSS class but could add JS hooks here for data loading
+            });
+        });
+    </script>
+</body>
+
+</html>

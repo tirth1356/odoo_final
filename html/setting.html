@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;700&amp;family=Hanken+Grotesk:wght@400;500;700&amp;family=JetBrains+Mono:wght@700&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "secondary-container": "#38fe13",
+                        "on-primary-container": "#f8fff0",
+                        "surface-container-high": "#eae7e7",
+                        "on-primary": "#ffffff",
+                        "inverse-primary": "#baccb2",
+                        "inverse-on-surface": "#f3f0ef",
+                        "surface-tint": "#53634e",
+                        "tertiary-container": "#d43f00",
+                        "surface-bright": "#fcf9f8",
+                        "secondary": "#106e00",
+                        "on-background": "#1c1b1b",
+                        "inverse-surface": "#313030",
+                        "on-surface-variant": "#444841",
+                        "tertiary": "#aa3000",
+                        "surface-container": "#f0eded",
+                        "primary-fixed-dim": "#baccb2",
+                        "primary-container": "#697963",
+                        "on-tertiary-fixed-variant": "#852400",
+                        "surface-container-lowest": "#ffffff",
+                        "on-primary-fixed-variant": "#3b4b37",
+                        "error-container": "#ffdad6",
+                        "surface": "#fcf9f8",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#e5e2e1",
+                        "primary-fixed": "#d6e8cd",
+                        "primary": "#50604b",
+                        "on-secondary-container": "#107100",
+                        "outline": "#747871",
+                        "error": "#ba1a1a",
+                        "on-secondary-fixed-variant": "#095300",
+                        "tertiary-fixed": "#ffdbd0",
+                        "on-surface": "#1c1b1b",
+                        "on-secondary": "#ffffff",
+                        "on-secondary-fixed": "#022100",
+                        "background": "#fcf9f8",
+                        "surface-dim": "#dcd9d9",
+                        "on-tertiary": "#ffffff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed-dim": "#ffb59e",
+                        "surface-variant": "#e5e2e1",
+                        "surface-container-low": "#f6f3f2",
+                        "secondary-fixed": "#79ff5b",
+                        "on-tertiary-fixed": "#3a0b00",
+                        "secondary-fixed-dim": "#2ae500",
+                        "on-tertiary-container": "#fffbff",
+                        "outline-variant": "#c4c8bf",
+                        "on-primary-fixed": "#111f0f"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "shadow-offset": "4px",
+                        "margin-mobile": "16px",
+                        "margin-desktop": "40px",
+                        "gutter": "24px",
+                        "unit": "4px"
+                    },
+                    "fontFamily": {
+                        "headline-lg-mobile": ["Archivo Narrow"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "display-lg": ["Archivo Narrow"],
+                        "label-bold": ["JetBrains Mono"],
+                        "headline-md": ["Archivo Narrow"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg": ["Archivo Narrow"]
+                    },
+                    "fontSize": {
+                        "headline-lg-mobile": ["28px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-lg": ["18px", { "lineHeight": "1.6", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800" }],
+                        "label-bold": ["12px", { "lineHeight": "1.4", "fontWeight": "700" }],
+                        "headline-md": ["24px", { "lineHeight": "1.2", "fontWeight": "700" }],
+                        "body-md": ["16px", { "lineHeight": "1.5", "fontWeight": "400" }],
+                        "headline-lg": ["32px", { "lineHeight": "1.2", "letterSpacing": "-0.01em", "fontWeight": "700" }]
+                    }
+                },
+            },
+        }
+    </script>
+    <style>
+        .brutalist-card {
+            border: 2px solid #1c1b1b;
+            box-shadow: 6px 6px 0px 0px #1c1b1b;
+            transition: all 0.1s ease-in-out;
+        }
+
+        .brutalist-card:hover {
+            box-shadow: 8px 8px 0px 0px #1c1b1b;
+            transform: translate(-2px, -2px);
+        }
+
+        .brutalist-button-active:active {
+            box-shadow: 0px 0px 0px 0px #1c1b1b;
+            transform: translate(6px, 6px);
+        }
+
+        .neo-toggle:checked~.neo-slider {
+            background-color: #38fe13;
+        }
+
+        .neo-toggle:checked~.neo-slider::before {
+            transform: translateX(24px);
+        }
+
+        .neo-slider::before {
+            content: "";
+            position: absolute;
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: #1c1b1b;
+            transition: .3s;
+        }
+    </style>
+</head>
+
+<body class="bg-surface text-on-surface font-body-md overflow-hidden">
+    <!-- Background Dimming Overlay -->
+    <div class="fixed inset-0 bg-on-background/80 z-0 flex items-center justify-center backdrop-blur-sm">
+        <!-- Dashboard Background Peeking (Visual context only) -->
+        <div class="absolute inset-0 z-[-1] opacity-20 pointer-events-none p-10 grid grid-cols-3 gap-6">
+            <div class="bg-surface border-2 border-on-surface h-40"></div>
+            <div class="bg-surface border-2 border-on-surface h-40"></div>
+            <div class="bg-surface border-2 border-on-surface h-40"></div>
+            <div class="col-span-2 bg-surface border-2 border-on-surface h-64"></div>
+            <div class="bg-surface border-2 border-on-surface h-64"></div>
+        </div>
+        <!-- SETTINGS MODAL -->
+        <div
+            class="relative w-full max-w-6xl max-h-[90vh] bg-surface-container-lowest border-4 border-on-surface shadow-[12px_12px_0px_0px_rgba(28,27,27,1)] flex flex-col overflow-hidden">
+            <!-- Modal Header -->
+            <header class="h-20 border-b-2 border-on-surface flex items-center justify-between px-8 bg-surface">
+                <div class="flex items-center gap-4">
+                    <button
+                        class="w-10 h-10 border-2 border-on-surface flex items-center justify-center bg-surface hover:bg-surface-container-high brutalist-button-active active:shadow-none transition-all">
+                        <span class="material-symbols-outlined font-bold">arrow_back</span>
+                    </button>
+                    <h1 class="font-headline-lg text-headline-lg uppercase tracking-tighter">Settings</h1>
+                </div>
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 border-2 border-on-surface bg-primary-fixed flex items-center justify-center">
+                        <span class="material-symbols-outlined">settings</span>
+                    </div>
+                </div>
+            </header>
+            <!-- Navigation Tabs -->
+            <nav class="flex border-b-2 border-on-surface bg-surface-container overflow-x-auto no-scrollbar">
+                <button
+                    class="px-8 py-4 font-label-bold text-label-bold uppercase border-r-2 border-on-surface bg-secondary-container text-on-secondary-container relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-1 after:bg-on-surface">
+                    Departments
+                </button>
+                <button
+                    class="px-8 py-4 font-label-bold text-label-bold uppercase border-r-2 border-on-surface hover:bg-surface-container-high transition-colors">
+                    Categories
+                </button>
+                <button
+                    class="px-8 py-4 font-label-bold text-label-bold uppercase border-r-2 border-on-surface hover:bg-surface-container-high transition-colors">
+                    ESG Configuration
+                </button>
+                <button
+                    class="px-8 py-4 font-label-bold text-label-bold uppercase border-r-2 border-on-surface hover:bg-surface-container-high transition-colors">
+                    Notification Settings
+                </button>
+            </nav>
+            <!-- Scrollable Content -->
+            <div class="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar">
+                <!-- Action Buttons & Search -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <button
+                            class="px-6 py-3 bg-primary text-on-primary border-2 border-on-surface font-label-bold text-label-bold uppercase shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] hover:shadow-[6px_6px_0px_0px_rgba(28,27,27,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">add</span>
+                            + New Department
+                        </button>
+                        <button
+                            class="px-6 py-3 bg-tertiary-fixed text-on-tertiary-fixed border-2 border-on-surface font-label-bold text-label-bold uppercase shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] hover:shadow-[6px_6px_0px_0px_rgba(28,27,27,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">edit</span>
+                            Edit
+                        </button>
+                        <button
+                            class="px-6 py-3 bg-error-container text-on-error-container border-2 border-on-surface font-label-bold text-label-bold uppercase shadow-[4px_4px_0px_0px_rgba(28,27,27,1)] hover:shadow-[6px_6px_0px_0px_rgba(28,27,27,1)] active:translate-x-1 active:translate-y-1 active:shadow-none transition-all flex items-center gap-2">
+                            <span class="material-symbols-outlined text-sm">delete</span>
+                            Delete
+                        </button>
+                    </div>
+                    <div class="relative w-64">
+                        <input
+                            class="w-full h-12 px-4 border-2 border-on-surface bg-surface font-body-md focus:ring-2 focus:ring-secondary focus:outline-none placeholder:text-on-surface-variant"
+                            placeholder="Search departments..." type="text" />
+                        <span
+                            class="material-symbols-outlined absolute right-3 top-3 text-on-surface-variant">search</span>
+                    </div>
+                </div>
+                <!-- Departments Table -->
+                <div
+                    class="border-2 border-on-surface bg-surface overflow-hidden shadow-[4px_4px_0px_0px_rgba(28,27,27,1)]">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-surface-container-high border-b-2 border-on-surface">
+                                <th class="p-4 font-label-bold text-label-bold uppercase">Name</th>
+                                <th class="p-4 font-label-bold text-label-bold uppercase">Code</th>
+                                <th class="p-4 font-label-bold text-label-bold uppercase">Head</th>
+                                <th class="p-4 font-label-bold text-label-bold uppercase">Parent Dept</th>
+                                <th class="p-4 font-label-bold text-label-bold uppercase">Employees</th>
+                                <th class="p-4 font-label-bold text-label-bold uppercase">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="font-body-md">
+                            <tr class="border-b-2 border-on-surface hover:bg-surface-container-low transition-colors">
+                                <td class="p-4 font-bold">Manufacturing</td>
+                                <td class="p-4 font-label-bold text-on-surface-variant">MFG</td>
+                                <td class="p-4">S. Nair</td>
+                                <td class="p-4 text-on-surface-variant">—</td>
+                                <td class="p-4 font-label-bold">132</td>
+                                <td class="p-4">
+                                    <span
+                                        class="px-2 py-1 bg-secondary-container text-on-secondary-container border border-on-surface text-[10px] font-bold uppercase tracking-wider">Active</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b-2 border-on-surface hover:bg-surface-container-low transition-colors">
+                                <td class="p-4 font-bold">Logistics</td>
+                                <td class="p-4 font-label-bold text-on-surface-variant">LOG</td>
+                                <td class="p-4">R. Iyer</td>
+                                <td class="p-4">Manufacturing</td>
+                                <td class="p-4 font-label-bold">58</td>
+                                <td class="p-4">
+                                    <span
+                                        class="px-2 py-1 bg-secondary-container text-on-secondary-container border border-on-surface text-[10px] font-bold uppercase tracking-wider">Active</span>
+                                </td>
+                            </tr>
+                            <tr class="border-b-2 border-on-surface hover:bg-surface-container-low transition-colors">
+                                <td class="p-4 font-bold">Corporate</td>
+                                <td class="p-4 font-label-bold text-on-surface-variant">COR</td>
+                                <td class="p-4">A. Mehta</td>
+                                <td class="p-4 text-on-surface-variant">—</td>
+                                <td class="p-4 font-label-bold">41</td>
+                                <td class="p-4">
+                                    <span
+                                        class="px-2 py-1 bg-secondary-container text-on-secondary-container border border-on-surface text-[10px] font-bold uppercase tracking-wider">Active</span>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-surface-container-low transition-colors">
+                                <td class="p-4 font-bold">Research &amp; Dev</td>
+                                <td class="p-4 font-label-bold text-on-surface-variant">RND</td>
+                                <td class="p-4">K. Jasoliya</td>
+                                <td class="p-4">Corporate</td>
+                                <td class="p-4 font-label-bold">24</td>
+                                <td class="p-4">
+                                    <span
+                                        class="px-2 py-1 bg-surface-container-high text-on-surface-variant border border-on-surface text-[10px] font-bold uppercase tracking-wider">Inactive</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <!-- ESG Configuration & Notifications Section -->
+                <section class="space-y-6">
+                    <h2
+                        class="font-headline-md text-headline-md uppercase border-b-2 border-on-surface pb-2 inline-block">
+                        ESG Configuration &amp; Notifications</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <!-- Toggle Group 1 -->
+                        <div class="space-y-4">
+                            <div
+                                class="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card">
+                                <span class="font-label-bold text-label-bold uppercase">Enable auto emission
+                                    calculation</span>
+                                <label class="relative inline-block w-12 h-6">
+                                    <input checked="" class="sr-only neo-toggle" type="checkbox" />
+                                    <div
+                                        class="neo-slider absolute inset-0 cursor-pointer bg-surface-container-high border-2 border-on-surface transition-all">
+                                    </div>
+                                </label>
+                            </div>
+                            <div
+                                class="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card">
+                                <span class="font-label-bold text-label-bold uppercase">Require evidence for all CSR
+                                    activities</span>
+                                <label class="relative inline-block w-12 h-6">
+                                    <input class="sr-only neo-toggle" type="checkbox" />
+                                    <div
+                                        class="neo-slider absolute inset-0 cursor-pointer bg-surface-container-high border-2 border-on-surface transition-all">
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        <!-- Toggle Group 2 -->
+                        <div class="space-y-4">
+                            <div
+                                class="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card">
+                                <span class="font-label-bold text-label-bold uppercase">Auto-award badges on challenge
+                                    completion</span>
+                                <label class="relative inline-block w-12 h-6">
+                                    <input checked="" class="sr-only neo-toggle" type="checkbox" />
+                                    <div
+                                        class="neo-slider absolute inset-0 cursor-pointer bg-surface-container-high border-2 border-on-surface transition-all">
+                                    </div>
+                                </label>
+                            </div>
+                            <div
+                                class="flex items-center justify-between p-4 border-2 border-on-surface bg-surface-container-lowest brutalist-card">
+                                <span class="font-label-bold text-label-bold uppercase">Email alerts for new compliance
+                                    issues</span>
+                                <label class="relative inline-block w-12 h-6">
+                                    <input checked="" class="sr-only neo-toggle" type="checkbox" />
+                                    <div
+                                        class="neo-slider absolute inset-0 cursor-pointer bg-surface-container-high border-2 border-on-surface transition-all">
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Data Visualization Section (Asymmetric) -->
+                <section class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-6">
+                    <div
+                        class="col-span-1 md:col-span-2 border-2 border-on-surface bg-surface p-6 shadow-[4px_4px_0px_0px_rgba(28,27,27,1)]">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-label-bold text-label-bold uppercase">System Performance Analytics</h3>
+                            <span class="material-symbols-outlined text-secondary">trending_up</span>
+                        </div>
+                        <div class="h-40 flex items-end gap-2 border-b border-on-surface/20">
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[40%] transition-all hover:h-[45%]">
+                            </div>
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[60%] transition-all hover:h-[65%]">
+                            </div>
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[30%] transition-all hover:h-[35%]">
+                            </div>
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[80%] transition-all hover:h-[85%]">
+                            </div>
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[55%] transition-all hover:h-[60%]">
+                            </div>
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[90%] transition-all hover:h-[95%]">
+                            </div>
+                            <div
+                                class="flex-1 bg-secondary-fixed border-2 border-on-surface h-[70%] transition-all hover:h-[75%]">
+                            </div>
+                        </div>
+                        <div
+                            class="mt-2 flex justify-between font-label-bold text-[10px] uppercase text-on-surface-variant">
+                            <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+                        </div>
+                    </div>
+                    <div
+                        class="bg-on-surface text-surface p-6 flex flex-col justify-between shadow-[4px_4px_0px_0px_rgba(28,27,27,1)]">
+                        <div>
+                            <h3 class="font-label-bold text-label-bold uppercase text-surface-variant">Data Integrity
+                            </h3>
+                            <div class="text-4xl font-headline-lg mt-2">99.8%</div>
+                        </div>
+                        <div class="mt-4">
+                            <div class="h-2 w-full bg-surface-container-high overflow-hidden">
+                                <div class="h-full bg-secondary-fixed w-[99.8%]"></div>
+                            </div>
+                            <p class="mt-2 font-label-bold text-[10px] uppercase">Verified Institutional Node</p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <!-- Modal Footer -->
+            <footer
+                class="h-24 border-t-2 border-on-surface bg-surface-container-low flex items-center justify-between px-8">
+                <div class="flex items-center gap-4 text-on-surface-variant font-label-bold text-label-bold uppercase">
+                    <span class="material-symbols-outlined text-sm">info</span>
+                    Last configuration audit: 2024-05-20 14:30 UTC
+                </div>
+                <div class="flex items-center gap-6">
+                    <button class="font-label-bold text-label-bold uppercase hover:underline transition-all">Cancel
+                        changes</button>
+                    <button
+                        class="px-10 py-4 bg-secondary-fixed text-on-secondary-fixed border-2 border-on-surface font-headline-md text-headline-md uppercase shadow-[6px_6px_0px_0px_rgba(28,27,27,1)] hover:shadow-[8px_8px_0px_0px_rgba(28,27,27,1)] active:translate-x-1.5 active:translate-y-1.5 active:shadow-none transition-all">
+                        Save
+                    </button>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <!-- Floating Cursor Labels (Brutalist Decorative Element) -->
+    <div
+        class="pointer-events-none fixed top-40 right-1/4 z-[100] px-3 py-1 bg-[#ff00ff] text-white border-2 border-black font-label-bold text-[10px] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">
+        Creative Meerkat
+    </div>
+    <div
+        class="pointer-events-none fixed top-60 right-1/3 z-[100] px-3 py-1 bg-[#7b1fa2] text-white border-2 border-black font-label-bold text-[10px] shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] uppercase">
+        Serene Penguin
+    </div>
+    <script>
+        // Tab Interaction Logic
+        const tabs = document.querySelectorAll('nav button');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => {
+                    t.classList.remove('bg-secondary-container', 'text-on-secondary-container', 'after:absolute');
+                    t.classList.add('hover:bg-surface-container-high');
+                });
+                tab.classList.add('bg-secondary-container', 'text-on-secondary-container', 'after:absolute', 'after:bottom-0', 'after:left-0', 'after:w-full', 'after:h-1', 'after:bg-on-surface');
+                tab.classList.remove('hover:bg-surface-container-high');
+            });
+        });
+
+        // Mock Micro-interaction for Toggles
+        document.querySelectorAll('.neo-toggle').forEach(toggle => {
+            toggle.addEventListener('change', (e) => {
+                const parent = e.target.closest('.brutalist-card');
+                if (e.target.checked) {
+                    parent.classList.add('border-secondary');
+                } else {
+                    parent.classList.remove('border-secondary');
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>
