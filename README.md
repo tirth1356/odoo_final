@@ -175,5 +175,3 @@ odoo_final/
 ---
 
 ```
-
-> **Note:** Running the seeder resets the existing demo data.
