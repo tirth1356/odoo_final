@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Dashboard from './Dashboard';
 import Environmental from './Environmental';
 import Social from './Social';
+import Governance from './Governance';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
 
@@ -36,6 +37,16 @@ const SUB_MODULES = {
       { id: 'csr', label: 'CSR Activities', icon: 'volunteer_activism' },
       { id: 'participation', label: 'Participation', icon: 'fact_check' },
       { id: 'audit', label: 'Audit Trail', icon: 'history' }
+    ]
+  },
+  governance: {
+    title: 'Governance Sub-Modules',
+    items: [
+      { id: 'overview', label: 'Overview', icon: 'analytics' },
+      { id: 'metrics', label: 'Metrics', icon: 'monitoring' },
+      { id: 'risk', label: 'Risk Assessment', icon: 'warning' },
+      { id: 'audit', label: 'Audit Trail', icon: 'history' },
+      { id: 'documents', label: 'Documents', icon: 'description' }
     ]
   }
 };
@@ -180,8 +191,12 @@ export default function App() {
             Social
           </button>
           <button 
-            onClick={() => alert('Governance compliance metrics coming soon!')} 
-            className="text-on-surface-variant font-bold uppercase hover:bg-secondary-fixed transition-all px-2 py-1"
+            onClick={() => setCurrentPage('governance')} 
+            className={`font-bold uppercase px-2 py-1 transition-all ${
+              currentPage === 'governance' 
+                ? 'text-secondary border-b-4 border-secondary' 
+                : 'text-on-surface-variant hover:bg-secondary-fixed'
+            }`}
           >
             Governance
           </button>
@@ -340,6 +355,7 @@ export default function App() {
           {currentPage === 'dashboard' && <Dashboard subPage={currentSubPage} onNavigate={setCurrentPage} />}
           {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
           {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
+          {currentPage === 'governance' && <Governance subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
 
           {currentPage === 'gaming' && (
             <div className="space-y-12">
