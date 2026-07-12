@@ -70,7 +70,7 @@ export default function LandingPage() {
             SYSTEM UPDATE: AI ROADMAP 2.0
           </div>
           <h2 className="text-display-lg font-display-lg text-on-surface max-w-4xl uppercase leading-tight mb-6">
-            INSTITUTIONAL-GRADE <span className="text-secondary">ESG INTELLIGENCE</span>. ACTIONABLE ANALYTICS. <span class="text-primary">ZERO FLUFF</span>.
+            INSTITUTIONAL-GRADE <span className="text-secondary">ESG INTELLIGENCE</span>. ACTIONABLE ANALYTICS. <span className="text-primary">ZERO FLUFF</span>.
           </h2>
           <p className="text-body-lg font-body-lg text-on-surface-variant max-w-2xl mb-12">
             Reject the greenwashing. Harness brutal precision in environmental, social, and governance reporting through our high-fidelity analytics engine.
@@ -156,7 +156,7 @@ export default function LandingPage() {
         <section id="solutions" className="px-margin-mobile md:px-margin-desktop py-24 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div className="space-y-8">
             <h2 className="text-headline-lg font-headline-lg uppercase border-l-8 border-secondary pl-6">THE ASSESSMENT INTERFACE</h2>
-            <p class="text-body-lg font-body-lg text-on-surface-variant">
+            <p className="text-body-lg font-body-lg text-on-surface-variant">
               Our multi-step intake engine is designed for rapid institutional deployment. Capture complex ESG datasets through a streamlined, secure interface that validates every entry against global standards in real-time.
             </p>
             <div className="space-y-4">

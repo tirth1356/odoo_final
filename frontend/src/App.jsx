@@ -560,39 +560,6 @@ function MainApp() {
 }
 
 export default function App() {
-  // Set up axios interceptors to attach JWT token and handle 401 Unauthorized redirect
-  useEffect(() => {
-    const reqInterceptor = axios.interceptors.request.use((config) => {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
-      return config;
-    }, (error) => {
-      return Promise.reject(error);
-    });
-
-    const resInterceptor = axios.interceptors.response.use(
-      (response) => response,
-      (error) => {
-        if (error.response && error.response.status === 401) {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          // Avoid redirect loop if already on login/signup/landing
-          const path = window.location.pathname;
-          if (path !== '/login' && path !== '/signup' && path !== '/') {
-            window.location.href = '/login';
-          }
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axios.interceptors.request.eject(reqInterceptor);
-      axios.interceptors.response.eject(resInterceptor);
-    };
-  }, []);
 
   return (
     <Router>
