@@ -18,6 +18,18 @@ class Command(BaseCommand):
         self.stdout.write("Starting comprehensive database seeding...")
         today = date.today()
 
+        self.stdout.write("Clearing old demo data...")
+        DepartmentScore.objects.all().delete()
+        OverallESGScore.objects.all().delete()
+        PurchaseRecord.objects.all().delete()
+        FleetRecord.objects.all().delete()
+        ManufacturingRecord.objects.all().delete()
+        ExpenseRecord.objects.all().delete()
+        CarbonTransaction.objects.all().delete()
+        EmployeeParticipation.objects.all().delete()
+        DiversityMetrics.objects.all().delete()
+        TrainingCompletion.objects.all().delete()
+
         # 0. Base Categories
         cat_csr, _ = Category.objects.get_or_create(name="Community Service", type="CSR Activity")
         cat_exp, _ = Category.objects.get_or_create(name="General Expenses", type="CSR Activity") # Reused for expenses
