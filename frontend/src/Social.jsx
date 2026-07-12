@@ -2,46 +2,25 @@ import React, { useState, useEffect } from 'react';
 
 const API_BASE = 'http://localhost:8000/api';
 
-const MOCK_CSR_CARDS = [
-  { id: 1, code: "CSR-092", title: "Tree Plantation", joined: 24, type: "EVIDENCE REQUIRED", icon: "park", colorClass: "text-secondary", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuClYDlsyPPadayBDD5S4C8s3PcWuknkW2QAOm08rK-WkmXo6Pl9VjBjEJPJso0kAlgfwxnEiX8tLr1-TW7US_lAjbYZUmYbDPJ2VRwUaGkkHWhIGJhUuYm0bmlp2u8sAy-uo62O7pHkvU01NL1Tv3xxAla-V91_ASi3QiWCfQfjWDBJAmukoeZT5dBJeLyUhX1oCjKpyzU7zGiBQ3lIOdxo4SSz9BLknC7-ZUzGJ9BUCbQBNNJZkh6EBA" },
-  { id: 2, code: "CSR-105", title: "Blood Donation", joined: 18, type: "EVIDENCE REQUIRED", icon: "water_drop", colorClass: "text-error", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB4Oeb_Bj2L6i6-SW1OJFrlDC8kwZpP2qVi8PjocP13Wb5LNDLCKK-Eo85ty7hRb4yS_aeGuJCmDSTt81ZeTxDz-MENf1Ug2qCO__cb54DAunOdhi_MFUtXB04E7o3tgfjbYXIoeYm-oUD_zTMmj9UW3fclCIjDAOB6bunZTAvvqvTKgDVxLLmsg2yCcLUUnUoUDgLJWxRRp73h_sduJKVyrpWIAKMc-Cq-G_Frqy63MwAEsunwAtS0AA" },
-  { id: 3, code: "CSR-088", title: "Beach Cleanup", joined: 31, type: "OPEN ENROLLMENT", icon: "waves", colorClass: "text-primary", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuAXxFZETDvaeTzEI5yxRY5fO-EVyB-NeDRvJ6Fiv3OvUUG6OWh8reRRb-5jNWz-pusizkOWhWxF1uuIgjTDoC9ZN_6z5pGEyWC_Ke8r1t5z44Dyy_p7ix0qq1VudLR93o4F9f0ROCfB21N63Sm-7oAAwQ4jgqfSKmFbu_yqnch8wDjsyDIhxghb26NrD_TtgZawc9ZAlyWDOv_Yxf5xtRysM9jtBCf7XSImfdBu60A26BToZ19z69VbAQ" },
-  { id: 4, code: "CSR-201", title: "ESG Workshop", joined: 52, type: "OPEN ENROLLMENT", icon: "menu_book", colorClass: "text-tertiary", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuCVa_93RjhbcAg8HTXctR5Z577WkLWMUPPzhNACUMf-boD56y_Yhe9H4nkZTAGx5bibt20jRBYROmYr4kvEl2Yp3v7TGBk3C9I2XBeRdpYXQn3B90oZ0jw9YZSJVFB09WLVh_vEHJHTnYTaFWW1H5IO4B4RvVUUEHZBpPn-FTcyUu_pYJmv-N3-XeK9I8q02Keiwg_4zzCCj9X9WnXWFV8bcAn3OFdsSKPykPdD-BRgckQtQA9q_s-LVA" }
-];
+// Mock data removed in favor of direct API connections
 
-const MOCK_APPROVAL_QUEUE = [
-  { id: 1, employee: "Aditi Rao", activity: "Tree Plantation", proof: "photo_v1.jpg", points: 50, avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuBexLxj_qAO_WsHoeemwNlTd_UGhvyaS9LsaYalZ0xrunF2G7BamOa0TZSJA6ucdcAMfecrrvF2d-CKCokIGOZ8fAnnHFiXoccZX4I169RW9SejnCqht-gyD0Bu-cj7THKeskq15TmDejAJ_AYMi7370b8tGqOBLyMUpKyy9pssmc5frk5cwfaeHsK5Wu61Z9GG8sn-u4FkYAMJUN3NF1AHQ-odAeM6Hr0HDe_gYphi97TlYa_nAx0vUw" },
-  { id: 2, employee: "Karan Shah", activity: "ESG Workshop", proof: "cert_final.pdf", points: 30, avatar: "https://lh3.googleusercontent.com/aida-public/AB6AXuARDctKElsokM3BxTt6UOJLORTR4hBp4WeZOtwXZ6OkxwfCsKgQ5_7z41ijVRaxlbsjIG-SSS_aLpaTFmXrtQdOdztqui995IvaxHgNHDNmBEpgeJZ5BwsMTBBN9KE3xgsUFyDZ-YeXKeCw7amPjzpllnWbGP-BKy8vAd5OYh53SdFGYLRYrRcLmoXk3LzqVrIm8SFYhuHsBJS76hkmJKfUrQo49Cct61q64spEkOv9Curgu1_0E-TR7g" }
-];
-
-const MOCK_CSR_RECORD = [
-  { id: 1, name: "Solar Panel Installation", date: "OCT 12, 2023", participants: 12, impact: "8.4/10", percentage: 84, status: "COMPLETED" },
-  { id: 2, name: "Community Kitchen", date: "NOV 05, 2023", participants: 45, impact: "9.1/10", percentage: 91, status: "COMPLETED" },
-  { id: 3, name: "Tech Mentorship", date: "DEC 20, 2023", participants: 8, impact: "TBD", percentage: 0, status: "PENDING" }
-];
-
-export default function Social({ subPage, setSubPage, onNavigate }) {
+export default function Social({ subPage, setSubPage, onNavigate, showToast }) {
   const [currentUser, setCurrentUser] = useState({ username: "johngreen", points: 120, xp: 350 });
-  const [csrActivities, setCsrActivities] = useState([
-    { id: 1, title: "Tree Plantation", description: "Help plant trees locally. Proof photo required.", points_earned: 50, xp_earned: 100 },
-    { id: 2, title: "ESG Workshop", description: "Participate in corporate compliance seminar.", points_earned: 30, xp_earned: 60 }
+  const [csrActivities, setCsrActivities] = useState([]);
+  const [participations, setParticipations] = useState([]);
+  const [diversity, setDiversity] = useState([]);
+  const [trainings, setTrainings] = useState([]);
+  const [approvalQueue, setApprovalQueue] = useState([]);
+  
+  // Use fallbacks for UI lists that aren't populated from DB yet
+  const [csrCards] = useState([
+    { id: 1, code: "CSR-092", title: "Tree Plantation", joined: 24, type: "EVIDENCE REQUIRED", icon: "park", colorClass: "text-secondary", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuClYDlsyPPadayBDD5S4C8s3PcWuknkW2QAOm08rK-WkmXo6Pl9VjBjEJPJso0kAlgfwxnEiX8tLr1-TW7US_lAjbYZUmYbDPJ2VRwUaGkkHWhIGJhUuYm0bmlp2u8sAy-uo62O7pHkvU01NL1Tv3xxAla-V91_ASi3QiWCfQfjWDBJAmukoeZT5dBJeLyUhX1oCjKpyzU7zGiBQ3lIOdxo4SSz9BLknC7-ZUzGJ9BUCbQBNNJZkh6EBA" },
+    { id: 2, code: "CSR-105", title: "Blood Donation", joined: 18, type: "EVIDENCE REQUIRED", icon: "water_drop", colorClass: "text-error", image: "https://lh3.googleusercontent.com/aida-public/AB6AXuB4Oeb_Bj2L6i6-SW1OJFrlDC8kwZpP2qVi8PjocP13Wb5LNDLCKK-Eo85ty7hRb4yS_aeGuJCmDSTt81ZeTxDz-MENf1Ug2qCO__cb54DAunOdhi_MFUtXB04E7o3tgfjbYXIoeYm-oUD_zTMmj9UW3fclCIjDAOB6bunZTAvvqvTKgDVxLLmsg2yCcLUUnUoUDgLJWxRRp73h_sduJKVyrpWIAKMc-Cq-G_Frqy63MwAEsunwAtS0AA" }
   ]);
-  const [participations, setParticipations] = useState([
-    { id: 1, employee_username: "johngreen", csr_activity_title: "Tree Plantation", proof_description: "Selfie on beach holding two trashbags.", approval_status: "Approved", points_earned: 50, completion_date: "2026-07-02" },
-    { id: 2, employee_username: "johngreen", csr_activity_title: "ESG Workshop", proof_description: "Participated on Zoom and received completion cert.", approval_status: "Approved", points_earned: 30, completion_date: "2026-07-07" },
-    { id: 3, employee_username: "sarahbright", csr_activity_title: "Tree Plantation", proof_description: "Beach cleaning proof uploaded.", approval_status: "Pending", points_earned: 0, completion_date: "2026-07-12" }
+  const [csrRecords] = useState([
+    { id: 1, name: "Solar Panel Installation", date: "OCT 12, 2023", participants: 12, impact: "8.4/10", percentage: 84, status: "COMPLETED" },
+    { id: 2, name: "Community Kitchen", date: "NOV 05, 2023", participants: 45, impact: "9.1/10", percentage: 91, status: "COMPLETED" }
   ]);
-  const [diversity, setDiversity] = useState([
-    { department_name: "Operations", female_percentage: "42.50", minority_percentage: "18.00", total_employees: 120 },
-    { department_name: "Research & Development", female_percentage: "48.00", minority_percentage: "22.20", total_employees: 45 },
-    { department_name: "Logistics", female_percentage: "25.00", minority_percentage: "12.50", total_employees: 60 }
-  ]);
-  const [trainings, setTrainings] = useState([
-    { id: 1, employee_username: "johngreen", course_name: "ESG Compliance Standards", date_completed: "2026-06-22", duration_hours: "3.5" },
-    { id: 2, employee_username: "sarahbright", course_name: "Cybersecurity Safeguards", date_completed: "2026-06-27", duration_hours: "2.0" },
-    { id: 3, employee_username: "davidloader", course_name: "Green Logistics & Route Optimization", date_completed: "2026-07-07", duration_hours: "5.0" }
-  ]);
-  const [approvalQueue, setApprovalQueue] = useState(MOCK_APPROVAL_QUEUE);
 
   // CSR Form State
   const [csrForm, setCsrForm] = useState({ csr_activity: '1', proof_description: '', proof_file_url: 'http://uploads/csr.jpg' });
@@ -66,7 +45,7 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
       if (resDiv.ok) setDiversity(await resDiv.json());
       if (resTrain.ok) setTrainings(await resTrain.json());
     } catch (e) {
-      console.warn("Using mock social datasets.");
+      if (showToast) showToast("Failed to fetch social datasets.", "error");
     }
   };
 
@@ -83,25 +62,14 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
         })
       });
       if (res.ok) {
-        alert("Volunteering proof submitted successfully!");
+        if (showToast) showToast("Volunteering proof submitted successfully!", "success");
         fetchSocialData();
         setCsrForm({ csr_activity: '1', proof_description: '', proof_file_url: 'http://uploads/csr.jpg' });
+      } else {
+        if (showToast) showToast("Error submitting proof.", "error");
       }
     } catch (err) {
-      // Simulate submission locally
-      const activeCSR = csrActivities.find(c => c.id === parseInt(csrForm.csr_activity)) || { title: 'Tree Plantation', points_earned: 50 };
-      const newPart = {
-        id: Date.now(),
-        employee_username: currentUser.username,
-        csr_activity_title: activeCSR.title,
-        proof_description: csrForm.proof_description,
-        approval_status: "Pending",
-        points_earned: 0,
-        completion_date: new Date().toISOString().split('T')[0]
-      };
-      setParticipations(prev => [newPart, ...prev]);
-      alert("Simulation: Proof submitted for review!");
-      setCsrForm({ csr_activity: '1', proof_description: '', proof_file_url: 'http://uploads/csr.jpg' });
+      if (showToast) showToast("Network error submitting proof.", "error");
     }
   };
 
@@ -112,12 +80,12 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
 
   const handleApproveQueueItem = (id, employeeName, activity, points) => {
     setApprovalQueue(prev => prev.filter(item => item.id !== id));
-    alert(`Approved ${activity} for ${employeeName}. Allocated ${points} points.`);
+    if (showToast) showToast(`Approved ${activity} for ${employeeName}. Allocated ${points} points.`, 'success');
   };
 
   const handleRejectQueueItem = (id, employeeName, activity) => {
     setApprovalQueue(prev => prev.filter(item => item.id !== id));
-    alert(`Rejected participation of ${employeeName} for ${activity}.`);
+    if (showToast) showToast(`Rejected participation of ${employeeName} for ${activity}.`, 'error');
   };
 
   return (
@@ -207,7 +175,7 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-gutter">
-              {MOCK_CSR_CARDS.map((card, idx) => (
+              {csrCards.map((card, idx) => (
                 <div key={idx} className="brutalist-card bg-surface overflow-hidden group flex flex-col justify-between">
                   <div className="h-32 w-full border-b-2 border-on-surface relative">
                     <img className="w-full h-full object-cover" src={card.image} alt={card.title} />
@@ -252,13 +220,15 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
                   </tr>
                 </thead>
                 <tbody className="text-xs">
-                  {diversity.map((d, i) => (
+                  {diversity.length > 0 ? diversity.map((d, i) => (
                     <tr key={i} className="border-b border-on-surface/10">
                       <td className="p-3 font-bold uppercase">{d.department_name}</td>
                       <td className="p-3 text-center font-mono">{parseFloat(d.female_percentage).toFixed(1)}%</td>
                       <td className="p-3 text-center font-mono">{parseFloat(d.minority_percentage).toFixed(1)}%</td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr><td colSpan="3" className="p-3 text-center text-sm font-bold uppercase text-on-surface-variant">No diversity data available</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -277,13 +247,15 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
                   </tr>
                 </thead>
                 <tbody className="text-xs">
-                  {trainings.map(t => (
+                  {trainings.length > 0 ? trainings.map(t => (
                     <tr key={t.id} className="border-b border-on-surface/10">
-                      <td className="p-3 font-bold">@{t.employee_username}</td>
+                      <td className="p-3 font-bold">@{t.employee_username || t.employee?.username}</td>
                       <td className="p-3 text-on-surface-variant">{t.course_name}</td>
                       <td className="p-3 text-right font-bold text-secondary font-mono">{t.duration_hours} hrs</td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr><td colSpan="3" className="p-3 text-center text-sm font-bold uppercase text-on-surface-variant">No trainings recorded</td></tr>
+                  )}
                 </tbody>
               </table>
             </div>
@@ -339,11 +311,11 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
                     </tr>
                   </thead>
                   <tbody className="text-xs">
-                    {participations.map(p => (
+                    {participations.length > 0 ? participations.map(p => (
                       <tr key={p.id} className="border-b border-on-surface/10 hover:bg-surface-container-low">
                         <td className="p-3 font-label-bold">{p.completion_date}</td>
-                        <td className="p-3 font-bold">@{p.employee_username}</td>
-                        <td className="p-3 text-on-surface">{p.csr_activity_title}</td>
+                        <td className="p-3 font-bold">@{p.employee_username || p.employee?.username}</td>
+                        <td className="p-3 text-on-surface">{p.csr_activity_title || p.csr_activity?.title}</td>
                         <td className="p-3 text-on-surface-variant italic">{p.proof_description}</td>
                         <td className="p-3">
                           <span className={`px-2 py-0.5 border border-on-surface text-[9px] font-bold ${
@@ -353,7 +325,9 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
                           </span>
                         </td>
                       </tr>
-                    ))}
+                    )) : (
+                      <tr><td colSpan="5" className="p-3 text-center text-sm font-bold uppercase text-on-surface-variant">No participations available</td></tr>
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -448,7 +422,7 @@ export default function Social({ subPage, setSubPage, onNavigate }) {
                 </tr>
               </thead>
               <tbody className="divide-y-2 divide-on-surface-variant/10">
-                {MOCK_CSR_RECORD.map(rec => (
+                {csrRecords.map(rec => (
                   <tr key={rec.id}>
                     <td className="px-6 py-4 font-bold uppercase">{rec.name}</td>
                     <td className="px-6 py-4 text-on-surface-variant">{rec.date}</td>

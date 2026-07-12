@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import axios from 'axios';
 import Dashboard from './Dashboard';
 import Environmental from './Environmental';
 import Social from './Social';
 import Governance from './Governance';
 import LandingPage from './components/LandingPage';
 import LoginPage from './components/LoginPage';
+import SignupPage from './components/SignupPage';
 
 const API_BASE = 'http://localhost:8000/api';
 
@@ -51,10 +54,24 @@ const SUB_MODULES = {
   }
 };
 
-export default function App() {
-  const [currentPage, setCurrentPage] = useState('landing'); // landing, login, dashboard, environmental, social, gaming, reports
+const Toast = ({ message, type, onClose }) => (
+  <div className={`fixed bottom-4 left-1/2 -translate-x-1/2 z-[100] px-6 py-4 border-2 border-on-surface brutalist-shadow text-sm font-bold uppercase transition-all flex items-center justify-between min-w-[300px] ${type === 'error' ? 'bg-error text-white' : 'bg-secondary text-on-secondary'}`}>
+    <span>{message}</span>
+    <button onClick={onClose} className="ml-4 hover:opacity-70"><span className="material-symbols-outlined text-sm">close</span></button>
+  </div>
+);
+
+function MainApp() {
+  const [currentPage, setCurrentPage] = useState('dashboard'); // dashboard, environmental, social, gaming, reports
   const [currentSubPage, setCurrentSubPage] = useState('overview');
   const [bellOpen, setBellOpen] = useState(false);
+  const [toast, setToast] = useState(null);
+  
+  const showToast = (message, type = 'info') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 4000);
+  };
+
   const [notifications, setNotifications] = useState([
     { id: 1, message: "CRITICAL WARNING: Compliance issue 'Hazardous Batteries Disposal Proof' is overdue!", created_at: "2026-07-12T11:45:00Z" }
   ]);
@@ -96,10 +113,10 @@ export default function App() {
         const dash = await resDash.json();
         setNotifications(dash.notifications);
         if (dash.leaderboard.length) {
-          const mainUser = dash.leaderboard.find(l => l.user.username === 'johngreen');
+          const mainUser = dash.leaderboard.find(l => l.user.username === 'johngreen') || dash.leaderboard[0];
           if (mainUser) {
             setUserProfile({
-              username: mainUser.user.username,
+              username: mainUser.user?.username || mainUser.username || "user",
               points: mainUser.points,
               xp: mainUser.xp
             });
@@ -114,44 +131,40 @@ export default function App() {
   const handleRecalculate = async () => {
     try {
       await fetch(`${API_BASE}/system/calculate-scores/`, { method: 'POST' });
-      alert("ESG scores recalculated!");
+      showToast("ESG scores recalculated successfully!", 'success');
       fetchGlobalData();
     } catch (e) {
-      alert("Simulation: scores recalculated.");
+      showToast("Simulation: scores recalculated.", 'success');
     }
   };
 
   const redeemReward = (rewardId) => {
     const r = rewards.find(rw => rw.id === rewardId);
     if (r.stock <= 0) {
-      alert("Out of stock!");
+      showToast("Out of stock!", 'error');
       return;
     }
     if (userProfile.points < r.points_required) {
-      alert("Insufficient points!");
+      showToast("Insufficient points!", 'error');
       return;
     }
-    alert(`Voucher redeemed: ${r.name} unlocked!`);
+    showToast(`Voucher redeemed: ${r.name} unlocked!`, 'success');
     setUserProfile(prev => ({ ...prev, points: prev.points - r.points_required }));
     setRewards(prev => prev.map(rw => rw.id === rewardId ? { ...rw, stock: rw.stock - 1 } : rw));
   };
 
   const triggerExport = () => {
     const query = new URLSearchParams(reportFilters).toString();
+    showToast(`Generating ${reportFilters.format.toUpperCase()} report for ${reportFilters.module}...`, 'info');
     window.open(`${API_BASE}/system/export-report/?${query}`, '_blank');
   };
-
-  if (currentPage === 'landing') {
-    return <LandingPage onNavigate={setCurrentPage} />;
-  }
-  if (currentPage === 'login') {
-    return <LoginPage onNavigate={setCurrentPage} />;
-  }
 
   const activeModule = SUB_MODULES[currentPage] || SUB_MODULES['dashboard'];
 
   return (
     <div className="min-h-screen bg-background text-on-background font-body-md flex flex-col">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
+
       
       {/* Top Navigation Bar */}
       <header className="fixed top-0 left-0 right-0 z-50 h-20 bg-surface border-b-2 border-on-surface shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] flex justify-between items-center px-margin-desktop">
@@ -233,7 +246,7 @@ export default function App() {
             )}
           </button>
           <button 
-            onClick={() => alert('Settings')} 
+            onClick={() => showToast('Settings menu opened', 'info')} 
             className="p-2 border-2 border-on-surface hover:bg-secondary-fixed transition-all"
           >
             <span className="material-symbols-outlined">settings</span>
@@ -324,14 +337,18 @@ export default function App() {
           <div className="pt-4 border-t-2 border-on-surface space-y-1 mt-auto">
             <button 
               className="flex items-center space-x-3 p-2 font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-on-surface w-full text-left" 
-              onClick={() => alert('Help Center')}
+              onClick={() => showToast('Help Center opened', 'info')}
             >
               <span className="material-symbols-outlined">help</span>
               <span>Help Center</span>
             </button>
             <button 
               className="flex items-center space-x-3 p-2 font-label-bold text-label-bold uppercase text-on-surface-variant hover:text-error w-full text-left" 
-              onClick={() => setCurrentPage('landing')}
+              onClick={() => {
+                localStorage.removeItem('access_token');
+                localStorage.removeItem('refresh_token');
+                window.location.href = '/';
+              }}
             >
               <span className="material-symbols-outlined">logout</span>
               <span>Log Out</span>
@@ -352,10 +369,10 @@ export default function App() {
 
         {/* Dynamic View Canvas */}
         <main className="lg:ml-64 flex-grow p-6 md:p-10 max-w-6xl mx-auto w-full pb-24">
-          {currentPage === 'dashboard' && <Dashboard subPage={currentSubPage} onNavigate={setCurrentPage} />}
-          {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
-          {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
-          {currentPage === 'governance' && <Governance subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} />}
+          {currentPage === 'dashboard' && <Dashboard subPage={currentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
+          {currentPage === 'environmental' && <Environmental subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
+          {currentPage === 'social' && <Social subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
+          {currentPage === 'governance' && <Governance subPage={currentSubPage} setSubPage={setCurrentSubPage} onNavigate={setCurrentPage} showToast={showToast} />}
 
           {currentPage === 'gaming' && (
             <div className="space-y-12">
@@ -385,7 +402,7 @@ export default function App() {
                         <h4 className="font-headline-md text-headline-md uppercase">{c.title}</h4>
                         <p className="text-xs text-on-surface-variant mt-2 uppercase">Deadline: {c.deadline}</p>
                       </div>
-                      <button className="w-full mt-4 bg-primary text-white font-label-bold text-xs py-3 border-2 border-on-surface brutalist-shadow-active" onClick={() => alert("Submission logged for evaluation!")}>
+                      <button className="w-full mt-4 bg-primary text-white font-label-bold text-xs py-3 border-2 border-on-surface brutalist-shadow-active" onClick={() => showToast("Submission logged for evaluation!", 'success')}>
                         SUBMIT COMPLETION
                       </button>
                     </div>
@@ -478,5 +495,38 @@ export default function App() {
         </div>
       </nav>
     </div>
+  );
+}
+
+export default function App() {
+  // Set up axios interceptor to attach JWT token
+  useEffect(() => {
+    const interceptor = axios.interceptors.request.use((config) => {
+      const token = localStorage.getItem('access_token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    }, (error) => {
+      return Promise.reject(error);
+    });
+
+    return () => {
+      axios.interceptors.request.eject(interceptor);
+    };
+  }, []);
+
+  return (
+    <Router>
+      <Routes>
+        {/* We can make a separate Dashboard page later, for now landing page is the "home" */}
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/app/*" element={<MainApp />} />
+        {/* Redirect unknown routes */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
   );
 }

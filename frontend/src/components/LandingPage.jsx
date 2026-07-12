@@ -1,26 +1,66 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 
-export default function LandingPage({ onNavigate }) {
+export default function LandingPage() {
+  const navigate = useNavigate();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('access_token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('refresh_token');
+    setIsAuthenticated(false);
+    alert("You have been logged out.");
+  };
   return (
     <div className="bg-background text-on-background font-body-md selection:bg-secondary-container selection:text-on-secondary-container">
       {/* TopAppBar */}
       <header className="fixed top-0 left-0 right-0 z-50 bg-primary-container text-on-primary-container border-b-2 border-on-background h-16 flex justify-between items-center px-margin-mobile md:px-margin-desktop">
-        <div className="flex items-center gap-4 cursor-pointer" onClick={() => onNavigate('landing')}>
+        <Link to="/" className="flex items-center gap-4 cursor-pointer">
           <span className="material-symbols-outlined text-headline-md">grid_view</span>
           <h1 className="text-headline-md font-headline-md font-bold tracking-tighter uppercase">ESG RESOLVE</h1>
-        </div>
+        </Link>
         <nav className="hidden md:flex gap-8 items-center">
           <a className="font-label-bold text-label-bold uppercase text-on-primary-container/80 hover:text-white transition-colors" href="#features">Features</a>
           <a className="font-label-bold text-label-bold uppercase text-on-primary-container/80 hover:text-white transition-colors" href="#solutions">Solutions</a>
           <a className="font-label-bold text-label-bold uppercase text-on-primary-container/80 hover:text-white transition-colors" href="#about">About</a>
-          <button
-            onClick={() => onNavigate('login')}
-            className="bg-on-background text-background font-label-bold text-label-bold px-6 py-2 border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all uppercase"
-          >
-            LOGIN
-          </button>
+          {!isAuthenticated ? (
+            <>
+              <button
+                onClick={() => navigate('/login')}
+                className="bg-on-background text-background font-label-bold text-label-bold px-6 py-2 border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all uppercase"
+              >
+                LOGIN
+              </button>
+              <button
+                onClick={() => navigate('/signup')}
+                className="bg-secondary text-on-secondary font-label-bold text-label-bold px-6 py-2 border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all uppercase"
+              >
+                SIGNUP
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                onClick={() => navigate('/app')}
+                className="bg-on-background text-background font-label-bold text-label-bold px-6 py-2 border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all uppercase"
+              >
+                DASHBOARD
+              </button>
+              <button
+                onClick={handleLogout}
+                className="bg-error-container text-on-error-container font-label-bold text-label-bold px-6 py-2 border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(255,255,255,1)] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-none transition-all uppercase"
+              >
+                LOGOUT
+              </button>
+            </>
+          )}
         </nav>
-        <button className="md:hidden material-symbols-outlined" onClick={() => onNavigate('login')}>menu</button>
+        <button className="md:hidden material-symbols-outlined" onClick={() => navigate(isAuthenticated ? '/' : '/login')}>menu</button>
       </header>
 
       <main className="pt-16 pb-24">
@@ -36,18 +76,29 @@ export default function LandingPage({ onNavigate }) {
             Reject the greenwashing. Harness brutal precision in environmental, social, and governance reporting through our high-fidelity analytics engine.
           </p>
           <div className="flex flex-col md:flex-row gap-6">
-            <button
-              onClick={() => onNavigate('login')}
-              className="bg-secondary text-on-secondary font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase"
-            >
-              START ASSESSMENT
-            </button>
-            <button
-              onClick={() => onNavigate('login')}
-              className="bg-white text-on-background font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all uppercase"
-            >
-              VIEW DEMO
-            </button>
+            {!isAuthenticated ? (
+              <>
+                <button
+                  onClick={() => navigate('/login')}
+                  className="bg-secondary text-on-secondary font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase"
+                >
+                  START ASSESSMENT (LOGIN)
+                </button>
+                <button
+                  onClick={() => navigate('/signup')}
+                  className="bg-white text-on-background font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] transition-all uppercase"
+                >
+                  CREATE ACCOUNT
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => navigate('/app')}
+                className="bg-secondary text-on-secondary font-label-bold text-[16px] px-10 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:shadow-[6px_6px_0px_0px_rgba(0,0,0,1)] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all uppercase"
+              >
+                GO TO DASHBOARD
+              </button>
+            )}
           </div>
         </section>
 
@@ -63,7 +114,7 @@ export default function LandingPage({ onNavigate }) {
                 <h3 className="text-headline-md font-headline-md uppercase mb-3">PRECISION ANALYTICS</h3>
                 <p className="text-on-surface-variant">Scoring across Environment, Social, and Governance pillars with calculated confidence vectors. Hard data, no compromises.</p>
               </div>
-              <div className="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center cursor-pointer" onClick={() => onNavigate('login')}>
+              <div className="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center cursor-pointer" onClick={() => navigate('/login')}>
                 <span className="text-label-bold font-label-bold uppercase">View Metrics</span>
                 <span className="material-symbols-outlined">arrow_forward</span>
               </div>
@@ -78,7 +129,7 @@ export default function LandingPage({ onNavigate }) {
                 <h3 className="text-headline-md font-headline-md uppercase mb-3">STRATEGIC INTELLIGENCE</h3>
                 <p className="text-on-surface-variant">Prioritized recommendations tailored specifically to your operational footprint and industry sector. Move from theory to execution.</p>
               </div>
-              <div className="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center cursor-pointer" onClick={() => onNavigate('login')}>
+              <div className="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center cursor-pointer" onClick={() => navigate('/login')}>
                 <span className="text-label-bold font-label-bold uppercase">Analyze Strategy</span>
                 <span className="material-symbols-outlined">arrow_forward</span>
               </div>
@@ -93,7 +144,7 @@ export default function LandingPage({ onNavigate }) {
                 <h3 className="text-headline-md font-headline-md uppercase mb-3">AI ORCHESTRATION</h3>
                 <p className="text-on-surface-variant">Deploy a step-by-step execution plan managed by our intelligent compliance neural network. Automated reporting at scale.</p>
               </div>
-              <div className="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center cursor-pointer" onClick={() => onNavigate('login')}>
+              <div className="mt-auto pt-4 border-t border-outline-variant flex justify-between items-center cursor-pointer" onClick={() => navigate('/login')}>
                 <span className="text-label-bold font-label-bold uppercase">Learn More</span>
                 <span className="material-symbols-outlined">arrow_forward</span>
               </div>
@@ -125,7 +176,7 @@ export default function LandingPage({ onNavigate }) {
               </div>
             </div>
             <button
-              onClick={() => onNavigate('login')}
+              onClick={() => navigate('/login')}
               className="bg-on-background text-white font-label-bold text-label-bold px-8 py-4 border-2 border-on-background shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] uppercase"
             >
               Explore Interface
@@ -239,21 +290,21 @@ export default function LandingPage({ onNavigate }) {
       {/* BottomNavBar (Mobile Only) */}
       <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 py-3 bg-surface border-t-2 border-on-background">
         <div
-          onClick={() => onNavigate('landing')}
+          onClick={() => navigate('/')}
           className="flex flex-col items-center justify-center bg-secondary-container text-on-secondary-container border-2 border-on-background shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] rounded-lg p-1 scale-95 transition-all cursor-pointer"
         >
           <span className="material-symbols-outlined">dashboard</span>
           <span className="text-label-bold font-label-bold">Dashboard</span>
         </div>
-        <div className="flex flex-col items-center justify-center text-on-surface-variant p-1 cursor-pointer" onClick={() => onNavigate('login')}>
+        <div className="flex flex-col items-center justify-center text-on-surface-variant p-1 cursor-pointer" onClick={() => navigate('/login')}>
           <span className="material-symbols-outlined">menu_open</span>
           <span className="text-label-bold font-label-bold">Modules</span>
         </div>
-        <div className="flex flex-col items-center justify-center text-on-surface-variant p-1 cursor-pointer" onClick={() => onNavigate('login')}>
+        <div className="flex flex-col items-center justify-center text-on-surface-variant p-1 cursor-pointer" onClick={() => navigate('/login')}>
           <span className="material-symbols-outlined">military_tech</span>
           <span className="text-label-bold font-label-bold">Gaming</span>
         </div>
-        <div className="flex flex-col items-center justify-center text-on-surface-variant p-1 cursor-pointer" onClick={() => onNavigate('login')}>
+        <div className="flex flex-col items-center justify-center text-on-surface-variant p-1 cursor-pointer" onClick={() => navigate('/login')}>
           <span className="material-symbols-outlined">description</span>
           <span className="text-label-bold font-label-bold">Reports</span>
         </div>

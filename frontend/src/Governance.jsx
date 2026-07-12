@@ -23,24 +23,32 @@ const MOCK_DEPARTMENTS = [
   { name: "Admin & Corporate", percentage: "82% COMPLIANT", badgeClass: "bg-tertiary-fixed text-on-tertiary-fixed-variant" }
 ];
 
-export default function Governance({ subPage, setSubPage, onNavigate }) {
+export default function Governance({ subPage, setSubPage, onNavigate, showToast }) {
   const [audits, setAudits] = useState(MOCK_AUDITS);
   const [complianceTrack, setComplianceTrack] = useState(MOCK_COMPLIANCE_TRACK);
 
+  const safeToast = (msg, type = 'info') => {
+    if (showToast) {
+      showToast(msg, type);
+    } else {
+      alert(msg);
+    }
+  };
+
   const handleDownload = (policyTitle) => {
-    alert(`Downloading latest PDF copy of: ${policyTitle}`);
+    safeToast(`Downloading latest PDF copy of: ${policyTitle}`, 'info');
   };
 
   const handleHistory = (policyTitle) => {
-    alert(`Loading historical changelog audit events for: ${policyTitle}`);
+    safeToast(`Loading historical changelog audit events for: ${policyTitle}`, 'info');
   };
 
   const handleSendReminders = () => {
-    alert("Alert: Compliance reminders dispatched to non-compliant department heads (Logistics and Admin).");
+    safeToast("Compliance reminders dispatched to Logistics and Admin.", 'success');
   };
 
   const handlePrepareDocs = (auditTitle) => {
-    alert(`Preparing compliance dossiers and auto-generating reports for: ${auditTitle}`);
+    safeToast(`Preparing compliance dossiers and auto-generating reports for: ${auditTitle}`, 'info');
   };
 
   const handleNewAudit = () => {
@@ -62,7 +70,7 @@ export default function Governance({ subPage, setSubPage, onNavigate }) {
     };
 
     setAudits(prev => [newAudit, ...prev]);
-    alert("New compliance audit scheduled successfully.");
+    safeToast("New compliance audit scheduled successfully.", 'success');
   };
 
   return (
@@ -89,7 +97,7 @@ export default function Governance({ subPage, setSubPage, onNavigate }) {
             + NEW AUDIT
           </button>
           <button 
-            onClick={() => alert('Exporting data sheets...')}
+            onClick={() => safeToast('Exporting data sheets...', 'info')}
             className="neo-brutalist-btn bg-white px-6 py-3 font-headline-md text-xs font-bold uppercase flex items-center gap-2"
           >
             EXPORT <span className="material-symbols-outlined text-sm">expand_more</span>
