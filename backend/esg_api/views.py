@@ -651,18 +651,54 @@ class ESGSystemViewSet(viewsets.ViewSet):
                 writer.writerow(row)
             return response
         else:
-            # Simple text/HTML layout for PDF preview
-            html_content = f"<html><head><style>table {{width: 100%; border-collapse: collapse;}} th, td {{border: 1px solid #ddd; padding: 8px; text-align: left;}} th {{background-color: #04AA6D; color: white;}}</style></head><body>"
-            html_content += f"<h1>ESG {module.capitalize() if module else 'General'} Report</h1>"
-            html_content += f"<h3>Export Date: {timezone.now().date()}</h3>"
-            html_content += "<table><thead><tr>"
-            for h in headers:
-                html_content += f"<th>{h}</th>"
-            html_content += "</tr></thead><tbody>"
+            # Generate PDF using ReportLab
+            import io
+            from reportlab.lib import colors
+            from reportlab.lib.pagesizes import letter, landscape
+            from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+            from reportlab.lib.styles import getSampleStyleSheet
+            
+            buffer = io.BytesIO()
+            doc = SimpleDocTemplate(buffer, pagesize=landscape(letter))
+            elements = []
+            
+            styles = getSampleStyleSheet()
+            title_text = f"ESG {module.capitalize() if module else 'General'} Report"
+            elements.append(Paragraph(title_text, styles['Title']))
+            elements.append(Paragraph(f"Export Date: {timezone.now().date()}", styles['Normal']))
+            elements.append(Spacer(1, 20))
+            
+            # Format data for table
+            table_data = [headers]
             for row in data_rows:
-                html_content += "<tr>"
-                for col in row:
-                    html_content += f"<td>{col}</td>"
-                html_content += "</tr>"
-            html_content += "</tbody></table></body></html>"
-            return HttpResponse(html_content, content_type='text/html')
+                # Convert everything to string to avoid reportlab errors with Decimals/Dates
+                table_data.append([str(col) for col in row])
+                
+            if len(table_data) > 1:
+                t = Table(table_data)
+                t.setStyle(TableStyle([
+                    ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#04AA6D')),
+                    ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'),
+                    ('FONTSIZE', (0, 0), (-1, 0), 12),
+                    ('BOTTOMPADDING', (0, 0), (-1, 0), 12),
+                    ('BACKGROUND', (0, 1), (-1, -1), colors.HexColor('#f2f2f2')),
+                    ('TEXTCOLOR', (0, 1), (-1, -1), colors.black),
+                    ('ALIGN', (0, 0), (-1, -1), 'LEFT'),
+                    ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'),
+                    ('FONTSIZE', (0, 1), (-1, -1), 10),
+                    ('TOPPADDING', (0, 1), (-1, -1), 6),
+                    ('BOTTOMPADDING', (0, 1), (-1, -1), 6),
+                    ('GRID', (0, 0), (-1, -1), 1, colors.black)
+                ]))
+                elements.append(t)
+            else:
+                elements.append(Paragraph("No data found for the selected criteria.", styles['Normal']))
+                
+            doc.build(elements)
+            
+            buffer.seek(0)
+            response = HttpResponse(buffer.read(), content_type='application/pdf')
+            response['Content-Disposition'] = f'attachment; filename="{filename}.pdf"'
+            return response
