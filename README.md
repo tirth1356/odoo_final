@@ -1,72 +1,79 @@
-# EcoSphere – ESG Intelligence Platform
+# 🌱 EcoSphere – ESG Intelligence Platform
 
-An ESG (Environmental, Social, Governance) management platform that integrates sustainability tracking into daily ERP operations. The platform helps organizations monitor carbon emissions, manage CSR activities, track governance compliance, engage employees through gamification, and generate ESG reports.
+A full-stack **Environmental, Social, and Governance (ESG)** management platform that integrates sustainability into everyday business operations. EcoSphere enables organizations to measure environmental impact, improve employee engagement, monitor governance compliance, and generate comprehensive ESG reports from a unified dashboard.
 
 ---
 
-## Tech Stack
+## 🚀 Tech Stack
 
 ### Backend
-- Django 5
-- Django REST Framework
-- PostgreSQL
-- SimpleJWT
-- ReportLab
-- OpenPyXL
+
+* Django 5
+* Django REST Framework
+* PostgreSQL
+* SimpleJWT
+* ReportLab
+* OpenPyXL
 
 ### Frontend
-- React 19
-- Vite
-- Tailwind CSS 4
-- React Router
-- Axios
+
+* React 19
+* Vite
+* Tailwind CSS 4
+* React Router
+* Axios
 
 ---
 
-## Features
+## ✨ Features
 
-### Environmental
-- Emission Factor Management
-- Carbon Transaction Tracking
-- Automatic Emission Calculation
-- Product ESG Profiles
-- Sustainability Goals
-- Department Carbon Tracking
+### 🌍 Environmental
 
-### Social
-- CSR Activities
-- Employee Participation
-- Diversity Metrics
-- Training Completion
-- Evidence Upload & Approval
+* Carbon emission tracking
+* Emission factor management
+* Automatic emission calculations
+* Sustainability goals
+* Department-wise environmental analytics
+* Product ESG profiles
 
-### Governance
-- ESG Policies
-- Policy Acknowledgements
-- Audits
-- Compliance Issues
-- Overdue Issue Tracking
+### 🤝 Social
 
-### Gamification
-- Sustainability Challenges
-- XP & Points
-- Badge Auto Unlock
-- Reward Redemption
-- Leaderboards
+* CSR activity management
+* Employee participation tracking
+* Proof-based approval workflow
+* Diversity metrics
+* Training completion tracking
 
-### Reports
-- Environmental Report
-- Social Report
-- Governance Report
-- ESG Summary Report
-- Custom Report Builder
-- Export as PDF, Excel and CSV
+### 🏛 Governance
+
+* ESG policy management
+* Policy acknowledgements
+* Audit management
+* Compliance issue tracking
+* Overdue compliance detection
+
+### 🏆 Gamification
+
+* Sustainability challenges
+* XP & points system
+* Badge auto-unlock
+* Reward redemption
+* Department & employee leaderboards
+
+### 📊 Reports
+
+* Environmental Report
+* Social Report
+* Governance Report
+* ESG Summary Report
+* Custom Report Builder
+* Export to **PDF**, **Excel**, and **CSV**
 
 ---
 
-## Business Workflow
+## ⚙️ Core Business Workflow
 
-```
+```text
 Master Data
 │
 ├── Departments
@@ -79,43 +86,64 @@ Master Data
         │
         ▼
 ERP Operations
-(Purchase • Manufacturing • Fleet • Expenses)
+(Purchases • Manufacturing • Fleet • Expenses)
         │
         ▼
 Carbon Transactions
 Employee Participation
-Challenge Participation
 Policy Acknowledgements
 Audits
 Compliance Issues
         │
         ▼
-Environmental + Social + Governance Scores
+Environmental Score
+Social Score
+Governance Score
         │
         ▼
 Department ESG Score
         │
         ▼
-Overall ESG Dashboard & Reports
+Organization ESG Dashboard & Reports
 ```
 
 ---
 
-## Project Structure
+## 📁 Project Structure
 
 ```text
 odoo_final/
 ├── backend/
 │   ├── config/
 │   ├── esg_api/
+│   │   ├── management/
+│   │   │   └── commands/
+│   │   │       └── seed_esg.py
+│   │   ├── models.py
+│   │   ├── serializers.py
+│   │   ├── urls.py
+│   │   └── views.py
 │   └── manage.py
+│
 └── frontend/
     └── src/
+        ├── components/
+        ├── pages/
+        ├── services/
+        ├── App.jsx
+        └── main.jsx
 ```
 
 ---
 
-## Getting Started
+## 🛠 Getting Started
+
+### Clone the repository
+
+```bash
+git clone <repository-url>
+cd odoo_final
+```
 
 ### Backend
 
@@ -129,9 +157,9 @@ python manage.py seed_esg
 python manage.py runserver
 ```
 
-API runs at:
+Backend runs at:
 
-```
+```text
 http://localhost:8000/api/
 ```
 
@@ -146,32 +174,56 @@ npm run dev
 
 Frontend runs at:
 
-```
+```text
 http://localhost:5173
 ```
 
 ---
 
-## API Modules
+## 🔗 API Modules
 
-| Module | Endpoints |
-|---------|-----------|
-| Organization | Departments, Categories |
-| Environmental | Emission Factors, Carbon Transactions, Goals, Product ESG |
-| Social | CSR Activities, Employee Participation, Diversity, Training |
-| Governance | Policies, Audits, Compliance Issues, Policy Acknowledgements |
-| Gamification | Challenges, Badges, Rewards, Leaderboards |
-| Reports | ESG Reports, Report Builder |
-| System | Dashboard, Score Calculation, Settings, Notifications |
+| Module        | Description                                                  |
+| ------------- | ------------------------------------------------------------ |
+| Organization  | Departments, Categories                                      |
+| Environmental | Emission Factors, Carbon Transactions, Goals, Product ESG    |
+| Social        | CSR Activities, Employee Participation, Diversity, Training  |
+| Governance    | Policies, Audits, Compliance Issues, Policy Acknowledgements |
+| Gamification  | Challenges, Badges, Rewards, Leaderboards                    |
+| Reports       | ESG Reports & Custom Report Builder                          |
+| System        | Dashboard, ESG Score Calculation, Settings, Notifications    |
 
 ---
 
-## Demo Data
+## 🎯 Highlights
 
-Run:
+* ESG score calculation engine
+* Configurable environmental, social, and governance weights
+* Automated carbon emission calculations
+* Configurable notification system
+* Badge auto-awarding
+* Reward redemption workflow
+* Role-based JWT authentication
+* Demo data seeding
+* Responsive user interface
+
+---
+
+## 🌟 Bonus Features
+
+* Department ESG rankings
+* Interactive dashboards
+* Mobile-responsive interface
+* Custom report builder
+* PDF, Excel, and CSV exports
+
+---
+
+## 🌱 Demo Data
+
+Populate the application with sample departments, employees, ESG policies, challenges, badges, rewards, audits, compliance issues, and other demo data using:
 
 ```bash
 python manage.py seed_esg
 ```
 
-This populates demo departments, employees, policies, challenges, badges, rewards, audits, compliance issues, and sample ESG data.
+> **Note:** Running the seeder resets the existing demo data.
