@@ -267,33 +267,90 @@ function NewAuditModal({ isOpen, onClose, onSubmit }) {
 const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000') + '/api';
 
 export default function Governance({ subPage, setSubPage, onNavigate, showToast, onExport }) {
-  const [audits, setAudits] = useState(MOCK_AUDITS);
+  const [audits, setAudits] = useState([]);
   const [complianceTrack] = useState(MOCK_COMPLIANCE_TRACK);
   const [newAuditOpen, setNewAuditOpen] = useState(false);
+
+  useEffect(() => {
+    fetchAudits();
+  }, []);
+
+  const fetchAudits = async () => {
+    try {
+      const res = await fetch(`${API_BASE}/audits/`);
+      if (res.ok) {
+        const data = await res.json();
+        // Map API data to UI format
+        const mapped = data.map(audit => ({
+          id: audit.id,
+          title: audit.title,
+          department: 'Corporate',
+          auditor: audit.auditor,
+          date: audit.date,
+          status: audit.status,
+          statusClass: (
+            audit.status === 'Completed' ?
+              'bg-secondary-container text-on-secondary-container' :
+            audit.status === 'In Progress' ?
+              'bg-tertiary-fixed text-on-tertiary-fixed-variant' :
+              'bg-surface-container-highest text-on-surface-variant'
+          )
+        }));
+        // Fallback to mock data if no data
+        setAudits(mapped.length > 0 ? mapped : MOCK_AUDITS);
+      } else {
+        setAudits(MOCK_AUDITS);
+      }
+    } catch (e) {
+      setAudits(MOCK_AUDITS);
+    }
+  };
 
   const safeToast = (msg, type = 'info') => {
     if (showToast) showToast(msg, type);
   };
 
-  const handleNewAuditSubmit = (form) => {
-    const newAudit = {
-      id: Date.now(),
-      title: form.title,
-      department: form.department,
-      auditor: form.auditor,
-      date: form.dueDate,
-      status: 'Upcoming',
-      statusClass: 'bg-surface-container-highest text-on-surface-variant',
-    };
-    setAudits(prev => [newAudit, ...prev]);
-    safeToast(`Audit "${form.title}" scheduled for ${form.department} · ${form.priority} priority`, 'success');
+  const handleNewAuditSubmit = async (form) => {
+    try {
+      // Make API call to create audit
+      const res = await fetch(`${API_BASE}/audits/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          title: form.title,
+          date: form.dueDate,
+          scope: form.scope,
+          auditor: form.auditor,
+          status: 'In Progress'
+        })
+      });
+      if (res.ok) {
+        const createdAudit = await res.json();
+        // Add to local state with mock UI fields
+        const newAudit = {
+          id: createdAudit.id,
+          title: createdAudit.title,
+          department: form.department,
+          auditor: createdAudit.auditor,
+          date: createdAudit.date,
+          status: 'In Progress',
+          statusClass: 'bg-tertiary-fixed text-on-tertiary-fixed-variant',
+        };
+        setAudits(prev => [newAudit, ...prev]);
+        safeToast(`Audit "${form.title}" scheduled for ${form.department} · ${form.priority} priority`, 'success');
+      } else {
+        safeToast('Failed to create audit!', 'error');
+      }
+    } catch (e) {
+      safeToast('Network error creating audit!', 'error');
+    }
   };
 
   const handleDownload = (policyTitle) => safeToast(`Downloading latest PDF: ${policyTitle}`, 'info');
   const handleHistory  = (policyTitle) => safeToast(`Loading changelog for: ${policyTitle}`, 'info');
   const handleSendReminders = async () => {
     try {
-      const res = await fetch(`${API_BASE}/governance/send-reminders`, {
+      const res = await fetch(`${API_BASE}/system/send-reminders/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
       });
